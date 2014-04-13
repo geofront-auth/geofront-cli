@@ -99,9 +99,9 @@ for p in authenticate, start:
 def keys(args):
     """List registered public keys."""
     client = get_client()
-    for key in client.public_keys:
+    for fingerprint, key in client.public_keys.items():
         if args.fingerprint:
-            print(key.fingerprint)
+            print(fingerprint)
         else:
             print(key)
 

@@ -101,8 +101,10 @@ class Client(object):
             if resp.code in (404, 410):
                 raise ExpiredTokenIdError('token id seems expired')
             keys = json.loads(resp.read().decode('utf-8'))
-        for key in keys:
-            yield PublicKey.parse_line(key)
+        return dict(
+            (fingerprint, PublicKey.parse_line(key))
+            for fingerprint, key in keys.items()
+        )
 
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(
