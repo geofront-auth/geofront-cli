@@ -6,6 +6,21 @@ It provides a CLI client for Geofront_, a simple SSH key management server.
 .. _Geofront: https://geofront.readthedocs.org/
 
 
+Installation
+------------
+
+It currently isn't available on PyPI, but you can install it using ``pip``
+installer.  Though you have to specify ``--allow-external`` and
+``--allow-unverified`` options (related issues: 1__, 2__).
+
+.. code-block::
+
+   $ pip install --allow-external dirspec --allow-unverified dirspec -e .
+
+__ http://stackoverflow.com/q/23014238/383405
+__ https://bugs.launchpad.net/dirspec/+bug/1298163
+
+
 Getting started
 ---------------
 
