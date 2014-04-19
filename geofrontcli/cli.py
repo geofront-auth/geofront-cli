@@ -145,6 +145,26 @@ keys.add_argument(
 )
 
 
+@subparser
+def masterkey(args):
+    """Show the current master key."""
+    client = get_client()
+    master_key = client.master_key
+    if args.fingerprint:
+        print(master_key.fingerprint)
+    else:
+        print(master_key)
+
+
+masterkey.add_argument(
+    '-v', '--verbose',
+    dest='fingerprint',
+    action='store_false',
+    help='print the master key with OpenSSH authorized_keys format instead of '
+         'its fingerprint'
+)
+
+
 def main(args=None):
     args = parser.parse_args(args)
     if getattr(args, 'function', None):

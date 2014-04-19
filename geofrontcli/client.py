@@ -102,6 +102,16 @@ class Client(object):
         self.token_id = token_id
 
     @property
+    def master_key(self):
+        """(:class:`~.key.PublicKey`) The current master key."""
+        path = ('tokens', self.token_id, 'masterkey')
+        headers = {'Accept': 'text/plain'}
+        with self.request('GET', path, headers=headers) as r:
+            if r.code == 200:
+                content_type = r.headers['Content-Type']
+                if re.match(r'^text/plain\s*(?:;|$)', content_type):
+                    return PublicKey.parse_line(r.read())
+        raise MasterKeyError('server failed to show the master key')
 
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(
@@ -198,6 +208,10 @@ class NoTokenIdError(TokenIdError, AttributeError):
 
 class ExpiredTokenIdError(TokenIdError):
     """Exception that rises when the used token id is expired."""
+
+
+class MasterKeyError(Exception):
+    """Exception related to the master key."""
 
 
 if sys.version_info < (3, 3):
