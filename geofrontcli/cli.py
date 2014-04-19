@@ -110,7 +110,7 @@ def authenticate(args):
                 try:
                     client.public_keys[public_key.fingerprint] = public_key
                 except ValueError as e:
-                    print(e)
+                    print(e, file=sys.stderr)
                     if args.debug:
                         raise
 
