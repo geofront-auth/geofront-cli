@@ -5,7 +5,6 @@
 import collections
 import contextlib
 import json
-import re
 import sys
 import uuid
 
@@ -133,10 +132,10 @@ class Client(object):
         """
         path = ('tokens', self.token_id, 'remotes')
         with self.request('GET', path) as r:
-            if r.code == 200:
-                mimetype, _ = parse_mimetype(r.headers['Content-Type'])
-                assert mimetype == 'application/json'
-                result = json.loads(r.read().decode('utf-8'))
+            assert r.code == 200
+            mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+            assert mimetype == 'application/json'
+            result = json.loads(r.read().decode('utf-8'))
         fmt = '{0[user]}@{0[host]}:{0[port]}'.format
         return dict((alias, fmt(remote)) for alias, remote in result.items())
 
