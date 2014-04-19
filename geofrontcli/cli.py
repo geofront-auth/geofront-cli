@@ -165,6 +165,27 @@ masterkey.add_argument(
 )
 
 
+@subparser
+def remotes(args):
+    """List available remotes."""
+    client = get_client()
+    remotes = client.remotes
+    if args.alias:
+        for alias in remotes:
+            print(alias)
+    else:
+        for alias, remote in remotes.items():
+            print('{0}\t{1}'.format(alias, remote))
+
+
+remotes.add_argument(
+    '-v', '--verbose',
+    dest='alias',
+    action='store_false',
+    help='print remote aliases with their actual addresses, not only aliases'
+)
+
+
 def main(args=None):
     args = parser.parse_args(args)
     if getattr(args, 'function', None):

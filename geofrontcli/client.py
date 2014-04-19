@@ -125,6 +125,21 @@ class Client(object):
                     return PublicKey.parse_line(r.read())
         raise MasterKeyError('server failed to show the master key')
 
+    @property
+    def remotes(self):
+        """(:class:`collections.Mapping`) The map of aliases to remote
+        addresses.
+
+        """
+        path = ('tokens', self.token_id, 'remotes')
+        with self.request('GET', path) as r:
+            if r.code == 200:
+                mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+                assert mimetype == 'application/json'
+                result = json.loads(r.read().decode('utf-8'))
+        fmt = '{0[user]}@{0[host]}:{0[port]}'.format
+        return dict((alias, fmt(remote)) for alias, remote in result.items())
+
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(
             type(self), self.server_url
