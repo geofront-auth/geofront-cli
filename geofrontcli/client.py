@@ -19,7 +19,19 @@ from .key import PublicKey
 from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
 
 __all__ = ('Client', 'ExpiredTokenIdError', 'MasterKeyError', 'NoTokenIdError',
-           'ProtocolVersionError', 'TokenIdError')
+           'ProtocolVersionError', 'TokenIdError', 'parse_mimetype')
+
+
+def parse_mimetype(content_type):
+    """Parse :mailheader:`Content-Type` header and return the actual mimetype
+    and its options.
+
+    >>> parse_mimetype('text/html; charset=utf-8')
+    ('text/html', ['charset=utf-8'])
+
+    """
+    values = [v.strip() for v in content_type.split(';')]
+    return values[0], values[1:]
 
 
 class Client(object):
@@ -108,8 +120,8 @@ class Client(object):
         headers = {'Accept': 'text/plain'}
         with self.request('GET', path, headers=headers) as r:
             if r.code == 200:
-                content_type = r.headers['Content-Type']
-                if re.match(r'^text/plain\s*(?:;|$)', content_type):
+                mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+                if mimetype == 'text/plain':
                     return PublicKey.parse_line(r.read())
         raise MasterKeyError('server failed to show the master key')
 
@@ -120,6 +132,7 @@ class Client(object):
 
 
 class PublicKeyDict(collections.MutableMapping):
+    """:class:`dict`-like object that contains public keys."""
 
     def __init__(self, client):
         self.client = client
@@ -127,9 +140,9 @@ class PublicKeyDict(collections.MutableMapping):
     def _request(self, path=(), method='GET', data=None, headers={}):
         path = ('tokens', self.client.token_id, 'keys') + path
         with self.client.request(method, path, data, headers) as resp:
-            content_type = resp.headers['Content-Type']
+            mimetype, _ = parse_mimetype(resp.headers['Content-Type'])
             body = resp.read()
-            if re.match(r'^application/json\s*(?:;|$)', content_type):
+            if mimetype == 'application/json':
                 body = json.loads(body.decode('utf-8'))
                 error = isinstance(body, dict) and body.get('error')
                 if resp.code == 404 and error == 'token-not-found' or \
