@@ -41,3 +41,20 @@ page in your default web browser:
    Geofront server URL: http://example.com/
    Continue to authenticate in your web browser...
    Press return to continue
+
+
+Missing features
+----------------
+
+- Wrapper for :program:`ssh`
+- Fabric support
+
+
+Author and license
+------------------
+
+`Hong Minhee`__ wrote geofront-cli, and Spoqa_ maintains it.
+It is licensed under GPLv3_ or later.
+
+.. _Spoqa: http://www.spoqa.com/
+.. _GPLv3: http://www.gnu.org/licenses/gpl-3.0.html

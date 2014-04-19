@@ -13,12 +13,14 @@ from dirspec.basedir import load_config_paths, save_config_path
 from six.moves import input
 
 from .client import Client, ExpiredTokenIdError, NoTokenIdError
+from .key import PublicKey
 
 
 CONFIG_RESOURCE = 'geofront-cli'
 SERVER_CONFIG_FILENAME = 'server'
 
 parser = argparse.ArgumentParser(description='Geofront client utility')
+parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
 subparsers = parser.add_subparsers()
 
 
@@ -83,6 +85,34 @@ def authenticate(args):
             print('Continue to authenticate in your web browser:')
             print(url)
         input('Press return to continue')
+    home = os.path.expanduser('~')
+    ssh_dir = os.path.join(home, '.ssh')
+    if os.path.isdir(ssh_dir):
+        for name in 'id_rsa.pub', 'id_dsa.pub':
+            pubkey_path = os.path.join(ssh_dir, name)
+            if os.path.isfile(pubkey_path):
+                with open(pubkey_path) as f:
+                    public_key = PublicKey.parse_line(f.read())
+                    break
+        else:
+            public_key = None
+        if public_key and public_key.fingerprint not in client.public_keys:
+            print('You have a public key ({0}), and it is not registered '
+                  'to the Geofront server ({1}).'.format(pubkey_path,
+                                                         client.server_url))
+            while True:
+                register = input('Would you register the public key to '
+                                 'the Geofront server (Y/n)? ').strip()
+                if register.lower() in ('', 'y', 'n'):
+                    break
+                print('{0!r} is an invalid answer.'.format(register))
+            if register.lower() != 'n':
+                try:
+                    client.public_keys[public_key.fingerprint] = public_key
+                except ValueError as e:
+                    print(e)
+                    if args.debug:
+                        raise
 
 
 for p in authenticate, start:
