@@ -11,14 +11,14 @@ Installation
 
 It currently isn't available on PyPI, but you can install it using ``pip``
 installer.  Though you have to specify ``--allow-external`` and
-``--allow-unverified`` options (related issues: 1__, 2__).
+``--allow-unverified`` options (related issues: 1_, 2_).
 
 .. code-block::
 
    $ pip install --allow-external dirspec --allow-unverified dirspec -e .
 
-__ http://stackoverflow.com/q/23014238/383405
-__ https://bugs.launchpad.net/dirspec/+bug/1298163
+.. _1: http://stackoverflow.com/q/23014238/383405
+.. _2: https://bugs.launchpad.net/dirspec/+bug/1298163
 
 
 Getting started
@@ -46,7 +46,7 @@ page in your default web browser:
 Missing features
 ----------------
 
-- Wrapper for :program:`ssh`
+- Wrapper for ``ssh``
 - Fabric support
 
 
@@ -56,5 +56,6 @@ Author and license
 `Hong Minhee`__ wrote geofront-cli, and Spoqa_ maintains it.
 It is licensed under GPLv3_ or later.
 
+__ http://dahlia.kr/
 .. _Spoqa: http://www.spoqa.com/
 .. _GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
