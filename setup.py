@@ -38,6 +38,8 @@ setup(
     long_description=readme(),
     author='Hong Minhee',
     author_email='minhee' '@' 'dahlia.kr',
+    maintainer='Spoqa',
+    maintainer_email='dev' '@' 'spoqa.com',
     license='GPLv3 or later',
     packages=find_packages(exclude=['tests']),
     entry_points='''

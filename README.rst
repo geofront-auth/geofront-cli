@@ -9,14 +9,17 @@ It provides a CLI client for Geofront_, a simple SSH key management server.
 Installation
 ------------
 
-It currently isn't available on PyPI, but you can install it using ``pip``
-installer.  Though you have to specify ``--allow-external`` and
-``--allow-unverified`` options (related issues: 1_, 2_).
+It is available on PyPI__, so you can install it using ``pip`` installer.
+Though you have to specify ``--allow-external`` and ``--allow-unverified``
+options (related issues: 1_, 2_).
 
-.. code-block::
+.. code-block:: console
 
-   $ pip install --allow-external dirspec --allow-unverified dirspec -e .
+   $ pip install --allow-external dirspec \
+                 --allow-unverified dirspec \
+                 geofront-cli
 
+__ https://pypi.python.org/pypi/geofront-cli
 .. _1: http://stackoverflow.com/q/23014238/383405
 .. _2: https://bugs.launchpad.net/dirspec/+bug/1298163
 
@@ -107,3 +110,12 @@ It is licensed under GPLv3_ or later.
 __ http://dahlia.kr/
 .. _Spoqa: http://www.spoqa.com/
 .. _GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
+
+
+Changelog
+---------
+
+Version 0.1.0
+`````````````
+
+First pre-alpha release.  Released on April 21, 2014.
