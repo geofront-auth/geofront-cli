@@ -115,6 +115,14 @@ __ http://dahlia.kr/
 Changelog
 ---------
 
+Version 0.1.1
+`````````````
+
+To be released.
+
+- Fix Python 2 incompatibility.
+
+
 Version 0.1.0
 `````````````
 

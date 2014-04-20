@@ -295,8 +295,13 @@ class RemoteStateError(RemoteError):
 if sys.version_info < (3, 3):
     class Request(Request):
 
+        superclass = Request
+
         def __init__(self, url, data=None, headers={}, method=None):
-            super(Request, self).__init__(url, data, headers)
+            if isinstance(Request, type):
+                super(Request, self).__init__(url, data, headers)
+            else:
+                self.superclass.__init__(self, url, data, headers)
             if method is not None:
                 self.method = method
 
