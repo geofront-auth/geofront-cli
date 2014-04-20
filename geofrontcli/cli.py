@@ -12,7 +12,8 @@ import webbrowser
 from dirspec.basedir import load_config_paths, save_config_path
 from six.moves import input
 
-from .client import Client, ExpiredTokenIdError, NoTokenIdError
+from .client import (Client, ExpiredTokenIdError, NoTokenIdError,
+                     RemoteError)
 from .key import PublicKey
 
 
@@ -183,6 +184,27 @@ remotes.add_argument(
     dest='alias',
     action='store_false',
     help='print remote aliases with their actual addresses, not only aliases'
+)
+
+
+@subparser
+def authorize(args):
+    """Temporarily authorize you to access the given remote.
+    A made authorization keeps alive in a minute, and then will be expired.
+
+    """
+    client = get_client()
+    try:
+        client.authorize(args.remote)
+    except RemoteError as e:
+        print(e, file=sys.stderr)
+        if args.debug:
+            raise
+
+
+authorize.add_argument(
+    'remote',
+    help='the remote alias to authorize you to access'
 )
 
 

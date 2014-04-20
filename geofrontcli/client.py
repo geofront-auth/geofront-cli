@@ -18,7 +18,8 @@ from .key import PublicKey
 from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
 
 __all__ = ('Client', 'ExpiredTokenIdError', 'MasterKeyError', 'NoTokenIdError',
-           'ProtocolVersionError', 'TokenIdError', 'parse_mimetype')
+           'ProtocolVersionError', 'RemoteAliasError', 'RemoteError',
+           'RemoteStateError', 'TokenIdError', 'parse_mimetype')
 
 
 def parse_mimetype(content_type):
@@ -139,6 +140,24 @@ class Client(object):
         fmt = '{0[user]}@{0[host]}:{0[port]}'.format
         return dict((alias, fmt(remote)) for alias, remote in result.items())
 
+    def authorize(self, alias):
+        """Temporarily authorize you to access the given remote ``alias``.
+        A made authorization keeps alive in a minute, and then will be expired.
+
+        """
+        path = ('tokens', self.token_id, 'remotes', alias)
+        with self.request('POST', path) as r:
+            mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+            assert mimetype == 'application/json'
+            result = json.loads(r.read().decode('utf-8'))
+            if r.code == 404 and result.get('error') == 'not-found':
+                raise RemoteAliasError(result.get('message'))
+            elif r.code == 500 and result.get('error') == 'connection-failure':
+                raise RemoteStateError(result.get('message'))
+            assert r.code == 200
+            assert result['success'] == 'authorized'
+            return '{0.user}@{0.host}:{0.port}'.format(result['remote'])
+
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(
             type(self), self.server_url
@@ -239,6 +258,18 @@ class ExpiredTokenIdError(TokenIdError):
 
 class MasterKeyError(Exception):
     """Exception related to the master key."""
+
+
+class RemoteError(Exception):
+    """Exception related to remote."""
+
+
+class RemoteAliasError(RemoteError, LookupError):
+    """Exception that rises when the given remote alias doesn't exist."""
+
+
+class RemoteStateError(RemoteError):
+    """Exception that rises when the status of the remote is unavailable."""
 
 
 if sys.version_info < (3, 3):

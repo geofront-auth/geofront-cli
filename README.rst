@@ -47,7 +47,7 @@ Missing features
 ----------------
 
 - Wrapper for ``ssh``
-- Fabric support
+- Autocompletion
 
 
 Author and license
