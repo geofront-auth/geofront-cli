@@ -211,7 +211,7 @@ def authorize(args):
     try:
         client.authorize(args.remote)
     except RemoteError as e:
-        print(e, file=sys.stderr)
+        parser.error(str(e))
         if args.debug:
             raise
 
@@ -220,6 +220,32 @@ authorize.add_argument(
     'remote',
     help='the remote alias to authorize you to access'
 )
+
+
+def get_ssh_options(remote):
+    """Translate the given ``remote`` to a corresponding :program:`ssh`
+    options.  For example, it returns the following list for ``'user@host'``::
+
+        ['-l', 'user', 'host']
+
+    The remote can contain the port number or omit the user login as well
+    e.g. ``'host:22'``::
+
+        ['-p', '22', 'host']
+
+    """
+    remote_match = REMOTE_PATTERN.match(remote)
+    if not remote_match:
+        raise ValueError('invalid remote format: ' + str(remote))
+    options = []
+    user = remote_match.group('user')
+    if user:
+        options.extend(['-l', user])
+    port = remote_match.group('port')
+    if port:
+        options.extend(['-p', port])
+    options.append(remote_match.group('host'))
+    return options
 
 
 @subparser
@@ -231,20 +257,15 @@ def colonize(args):
     """
     client = get_client()
     remote = client.remotes.get(args.remote, args.remote)
-    remote_match = REMOTE_PATTERN.match(remote)
-    if not remote_match:
-        parser.error('invalid remote format: ' + str(remote))
+    try:
+        options = get_ssh_options(remote)
+    except ValueError as e:
+        parser.error(str(e))
     cmd = [args.ssh]
-    user = remote_match.group('user')
-    if user:
-        cmd.extend(['-l', user])
-    port = remote_match.group('port')
-    if port:
-        cmd.extend(['-p', port])
     if args.identity_file:
         cmd.extend(['-i', args.identity_file])
+    cmd.extend(options)
     cmd.extend([
-        remote_match.group('host'),
         'mkdir', '~/.ssh', '&>', '/dev/null', '||', 'true', ';',
         'echo', repr(str(client.master_key)),
         '>>', '~/.ssh/authorized_keys'
@@ -259,6 +280,26 @@ colonize.add_argument(
          'of the ssh program if used'
 )
 colonize.add_argument('remote', help='the remote alias to colonize')
+
+
+@subparser
+def ssh(args):
+    """SSH to the remote through Geofront's temporary authorization."""
+    client = get_client()
+    try:
+        remote = client.authorize(args.remote)
+    except RemoteError as e:
+        parser.error(str(e))
+        if args.debug:
+            raise
+    try:
+        options = get_ssh_options(remote)
+    except ValueError as e:
+        parser.error(str(e))
+    subprocess.call([args.ssh] + options)
+
+
+ssh.add_argument('remote', help='the remote alias to ssh')
 
 
 def main(args=None):

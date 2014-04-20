@@ -165,7 +165,7 @@ class Client(object):
                 raise RemoteStateError(result.get('message'))
             assert r.code == 200
             assert result['success'] == 'authorized'
-            return '{0.user}@{0.host}:{0.port}'.format(result['remote'])
+            return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
 
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(

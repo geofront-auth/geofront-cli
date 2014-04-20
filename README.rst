@@ -46,7 +46,9 @@ page in your default web browser:
 Missing features
 ----------------
 
-- Wrapper for ``ssh``
+- Wrapper around ``scp``
+- Shortcut for ``geofront-cli ssh`` command
+- Make ``geofront-cli ssh`` similar to ``ssh``
 - Autocompletion
 
 
