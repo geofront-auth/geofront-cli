@@ -4,6 +4,7 @@
 """
 import collections
 import contextlib
+import io
 import json
 import re
 import sys
@@ -58,14 +59,14 @@ class Client(object):
         if isinstance(url, tuple):
             url = './{0}/'.format('/'.join(url))
         url = urljoin(self.server_url, url)
-        headers = dict(headers)
-        headers.update({
+        h = {
             'User-Agent': 'geofront-cli/{0} (Python-urllib/{1})'.format(
                 VERSION, sys.version[:3]
             ),
             'Accept': 'application/json'
-        })
-        request = Request(url, method=method, data=data, headers=headers)
+        }
+        h.update(headers)
+        request = Request(url, method=method, data=data, headers=h)
         try:
             response = urlopen(request)
         except HTTPError as e:
@@ -94,6 +95,19 @@ class Client(object):
                 'the server did not send the protocol version '
                 '(X-Geofront-Version)'
             )
+        mimetype, _ = parse_mimetype(response.headers['Content-Type'])
+        if mimetype == 'application/json' and response.code in (404, 410):
+            read = response.read()
+            body = json.loads(read.decode('utf-8'))
+            response.close()
+            error = isinstance(body, dict) and body.get('error')
+            if response.code == 404 and error == 'token-not-found' or \
+               response.code == 410 and error == 'expired-token':
+                raise ExpiredTokenIdError('token id seems expired')
+            buffered = io.ByteIO(read)
+            yield buffered
+            buffered.close()
+            return
         yield response
         response.close()
 
@@ -187,9 +201,6 @@ class PublicKeyDict(collections.MutableMapping):
             if mimetype == 'application/json':
                 body = json.loads(body.decode('utf-8'))
                 error = isinstance(body, dict) and body.get('error')
-                if resp.code == 404 and error == 'token-not-found' or \
-                   resp.code == 410 and error == 'expired-token':
-                    raise ExpiredTokenIdError('token id seems expired')
             else:
                 error = None
             return resp.code, body, error

@@ -14,7 +14,7 @@ from dirspec.basedir import load_config_paths, save_config_path
 from six.moves import input
 
 from .client import (REMOTE_PATTERN, Client, ExpiredTokenIdError,
-                     NoTokenIdError, RemoteError)
+                     NoTokenIdError, RemoteError, TokenIdError)
 from .key import PublicKey
 
 
@@ -128,16 +128,6 @@ def authenticate(args):
                     print(e, file=sys.stderr)
                     if args.debug:
                         raise
-
-
-for p in authenticate, start:
-    p.add_argument(
-        '-O', '--no-open-browser',
-        dest='open_browser',
-        action='store_false',
-        help='do not open the authentication web page using browser.  '
-             'instead print the url to open'
-    )
 
 
 @subparser
@@ -285,13 +275,19 @@ colonize.add_argument('remote', help='the remote alias to colonize')
 @subparser
 def ssh(args):
     """SSH to the remote through Geofront's temporary authorization."""
-    client = get_client()
-    try:
-        remote = client.authorize(args.remote)
-    except RemoteError as e:
-        parser.error(str(e))
-        if args.debug:
-            raise
+    while True:
+        client = get_client()
+        try:
+            remote = client.authorize(args.remote)
+        except RemoteError as e:
+            parser.error(str(e))
+            if args.debug:
+                raise
+        except TokenIdError:
+            print('Authentication required.')
+            authenticate.call(args)
+        else:
+            break
     try:
         options = get_ssh_options(remote)
     except ValueError as e:
@@ -300,6 +296,16 @@ def ssh(args):
 
 
 ssh.add_argument('remote', help='the remote alias to ssh')
+
+
+for p in authenticate, start, ssh:
+    p.add_argument(
+        '-O', '--no-open-browser',
+        dest='open_browser',
+        action='store_false',
+        help='do not open the authentication web page using browser.  '
+             'instead print the url to open'
+    )
 
 
 def main(args=None):
