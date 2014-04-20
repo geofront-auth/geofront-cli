@@ -36,6 +36,7 @@ setup(
     version=VERSION,
     description='CLI client for Geofront, a simple SSH key management server',
     long_description=readme(),
+    url='https://github.com/spoqa/geofront-cli',
     author='Hong Minhee',
     author_email='minhee' '@' 'dahlia.kr',
     maintainer='Spoqa',
