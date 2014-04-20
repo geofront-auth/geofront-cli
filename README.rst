@@ -43,6 +43,52 @@ page in your default web browser:
    Press return to continue
 
 
+List available remotes
+----------------------
+
+You can list the available remotes using ``geofront-cli remotes`` command:
+
+.. code-block:: console
+
+   $ geofront-cli remotes
+   web-1
+   web-2
+   web-3
+   worker-1
+   worker-2
+   db-1
+   db-2
+
+If you give ``-v``/``--verbose`` option it will show their actual addresses
+as well:
+
+.. code-block:: console
+
+   $ geofront-cli remotes -v
+   web-1	ubuntu@192.168.0.5
+   web-2	ubuntu@192.168.0.6
+   web-3	ubuntu@192.168.0.7
+   worker-1	ubuntu@192.168.0.25
+   worker-2	ubuntu@192.168.0.26
+   db-1	ubuntu@192.168.0.50
+   db-2	ubuntu@192.168.0.51
+
+
+SSH to remote
+-------------
+
+You can easily connect to a remote through SSH.  Use ``geofront-cli ssh``
+command instead of vanilla ``ssh``:
+
+.. code-block:: console
+
+   $ geofront-cli ssh web-1
+   Welcome to Ubuntu 12.04.3 LTS (GNU/Linux 2.6.32-042stab078.27 i686)
+
+    * Documentation:  https://help.ubuntu.com/
+   ubuntu@web-1:~$ 
+
+
 Missing features
 ----------------
 
