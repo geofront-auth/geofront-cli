@@ -5,6 +5,7 @@
 import collections
 import contextlib
 import json
+import re
 import sys
 import uuid
 
@@ -17,9 +18,17 @@ from six.moves.urllib.request import Request, urlopen
 from .key import PublicKey
 from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
 
-__all__ = ('Client', 'ExpiredTokenIdError', 'MasterKeyError', 'NoTokenIdError',
-           'ProtocolVersionError', 'RemoteAliasError', 'RemoteError',
-           'RemoteStateError', 'TokenIdError', 'parse_mimetype')
+__all__ = ('REMOTE_PATTERN', 'Client', 'ExpiredTokenIdError',
+           'MasterKeyError', 'NoTokenIdError', 'ProtocolVersionError',
+           'RemoteAliasError', 'RemoteError', 'RemoteStateError',
+           'TokenIdError', 'parse_mimetype')
+
+
+#: (:class:`re.RegexObject`) The pattern that matches to the remote string
+#: look like ``'user@host:port'``.
+REMOTE_PATTERN = re.compile(r'^(?:(?P<user>[^@]+)@)?'
+                            r'(?P<host>[^:]+)'
+                            r'(?::(?P<port>\d+))?$')
 
 
 def parse_mimetype(content_type):

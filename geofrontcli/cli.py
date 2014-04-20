@@ -6,21 +6,35 @@ from __future__ import print_function
 
 import argparse
 import os.path
+import subprocess
 import sys
 import webbrowser
 
 from dirspec.basedir import load_config_paths, save_config_path
 from six.moves import input
 
-from .client import (Client, ExpiredTokenIdError, NoTokenIdError,
-                     RemoteError)
+from .client import (REMOTE_PATTERN, Client, ExpiredTokenIdError,
+                     NoTokenIdError, RemoteError)
 from .key import PublicKey
 
 
 CONFIG_RESOURCE = 'geofront-cli'
 SERVER_CONFIG_FILENAME = 'server'
 
+SSH_PROGRAM = None
+try:
+    SSH_PROGRAM = subprocess.check_output(['which', 'ssh']).strip() or None
+except subprocess.CalledProcessError:
+    pass
+
+
 parser = argparse.ArgumentParser(description='Geofront client utility')
+parser.add_argument(
+    '--ssh',
+    default=SSH_PROGRAM,
+    required=not SSH_PROGRAM,
+    help='ssh client to use' + (' [%(default)s]' if SSH_PROGRAM else '')
+)
 parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
 subparsers = parser.add_subparsers()
 
@@ -206,6 +220,45 @@ authorize.add_argument(
     'remote',
     help='the remote alias to authorize you to access'
 )
+
+
+@subparser
+def colonize(args):
+    """Make the given remote to allow the current master key.
+    It is equivalent to ``geofront-cli masterkey -v > /tmp/master_id_rsa &&
+    ssh-copy-id -i /tmp/master_id_rsa REMOTE``.
+
+    """
+    client = get_client()
+    remote = client.remotes.get(args.remote, args.remote)
+    remote_match = REMOTE_PATTERN.match(remote)
+    if not remote_match:
+        parser.error('invalid remote format: ' + str(remote))
+    cmd = [args.ssh]
+    user = remote_match.group('user')
+    if user:
+        cmd.extend(['-l', user])
+    port = remote_match.group('port')
+    if port:
+        cmd.extend(['-p', port])
+    if args.identity_file:
+        cmd.extend(['-i', args.identity_file])
+    cmd.extend([
+        remote_match.group('host'),
+        'mkdir', '~/.ssh', '&>', '/dev/null', '||', 'true', ';',
+        'echo', repr(str(client.master_key)),
+        '>>', '~/.ssh/authorized_keys'
+    ])
+    subprocess.call(cmd)
+
+
+colonize.add_argument(
+    '-i',
+    dest='identity_file',
+    help='identity file to use.  it will be forwarded to the same option '
+         'of the ssh program if used'
+)
+colonize.add_argument('remote', help='the remote alias to colonize')
 
 
 def main(args=None):
