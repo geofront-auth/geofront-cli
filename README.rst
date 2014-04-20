@@ -120,7 +120,8 @@ Version 0.1.1
 
 To be released.
 
-- Fix Python 2 incompatibility.
+- Fixed Python 2 incompatibility.
+- Added warning for non-SSL server URL.
 
 
 Version 0.1.0

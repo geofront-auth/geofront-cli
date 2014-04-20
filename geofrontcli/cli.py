@@ -73,7 +73,18 @@ def start(args):
                 print(message + '; overwriting...', file=sys.stderr)
             else:
                 parser.exit(message)
-    server_url = input('Geofront server URL: ')
+    while True:
+        server_url = input('Geofront server URL: ')
+        if not server_url.startswith(('https://', 'http://')):
+            print(server_url, 'is not a valid url.')
+            continue
+        elif not server_url.startswith('https://'):
+            cont = input('It is not a secure URL. '
+                         'https:// is preferred over http://. '
+                         'Continue (y/N)? ')
+            if cont.strip().lower() != 'y':
+                continue
+        break
     server_config_filename = os.path.join(
         save_config_path(CONFIG_RESOURCE).decode(),
         SERVER_CONFIG_FILENAME
