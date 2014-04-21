@@ -122,6 +122,7 @@ To be released.
 
 - Fixed Python 2 incompatibility.
 - Added warning for non-SSL server URL.
+- Added handling of unfinished authentication error.
 
 
 Version 0.1.0
