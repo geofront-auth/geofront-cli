@@ -115,6 +115,14 @@ __ http://dahlia.kr/
 Changelog
 ---------
 
+Version 0.1.2
+`````````````
+
+To be released
+
+- Added handling of unfinished authentication error.
+
+
 Version 0.1.1
 `````````````
 

@@ -14,7 +14,8 @@ from dirspec.basedir import load_config_paths, save_config_path
 from six.moves import input
 
 from .client import (REMOTE_PATTERN, Client, ExpiredTokenIdError,
-                     NoTokenIdError, RemoteError, TokenIdError)
+                     NoTokenIdError, RemoteError, TokenIdError,
+                     UnfinishedAuthenticationError)
 from .key import PublicKey
 
 
@@ -103,14 +104,21 @@ start.add_argument('-f', '--force',
 def authenticate(args):
     """Authenticate to Geofront server."""
     client = get_client()
-    with client.authenticate() as url:
-        if args.open_browser:
-            print('Continue to authenticate in your web browser...')
-            webbrowser.open(url)
-        else:
-            print('Continue to authenticate in your web browser:')
-            print(url)
+    while True:
+        with client.authenticate() as url:
+            if args.open_browser:
+                print('Continue to authenticate in your web browser...')
+                webbrowser.open(url)
+            else:
+                print('Continue to authenticate in your web browser:')
+                print(url)
         input('Press return to continue')
+        try:
+            client.identity
+        except UnfinishedAuthenticationError as e:
+            print(str(e))
+        else:
+            break
     home = os.path.expanduser('~')
     ssh_dir = os.path.join(home, '.ssh')
     if os.path.isdir(ssh_dir):

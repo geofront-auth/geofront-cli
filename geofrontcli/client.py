@@ -22,7 +22,8 @@ from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
 __all__ = ('REMOTE_PATTERN', 'Client', 'ExpiredTokenIdError',
            'MasterKeyError', 'NoTokenIdError', 'ProtocolVersionError',
            'RemoteAliasError', 'RemoteError', 'RemoteStateError',
-           'TokenIdError', 'parse_mimetype')
+           'TokenIdError', 'UnfinishedAuthenticationError',
+           'parse_mimetype')
 
 
 #: (:class:`re.RegexObject`) The pattern that matches to the remote string
@@ -96,7 +97,7 @@ class Client(object):
                 '(X-Geofront-Version)'
             )
         mimetype, _ = parse_mimetype(response.headers['Content-Type'])
-        if mimetype == 'application/json' and response.code in (404, 410):
+        if mimetype == 'application/json' and 400 <= response.code < 500:
             read = response.read()
             body = json.loads(read.decode('utf-8'))
             response.close()
@@ -104,6 +105,8 @@ class Client(object):
             if response.code == 404 and error == 'token-not-found' or \
                response.code == 410 and error == 'expired-token':
                 raise ExpiredTokenIdError('token id seems expired')
+            elif response.code == 412 and error == 'unfinished-authentication':
+                raise UnfinishedAuthenticationError(body['message'])
             buffered = io.ByteIO(read)
             yield buffered
             buffered.close()
@@ -135,6 +138,16 @@ class Client(object):
             result = json.loads(response.read().decode('utf-8'))
             yield result['next_url']
         self.token_id = token_id
+
+    @property
+    def identity(self):
+        """(:class:`tuple`) A pair of ``(team_type, identifier)``."""
+        with self.request('GET', ('tokens', self.token_id)) as r:
+            assert r.code == 200
+            mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+            assert mimetype == 'application/json'
+            result = json.loads(r.read().decode('utf-8'))
+            return result['team_type'], result['identifier']
 
     @property
     def master_key(self):
@@ -274,6 +287,13 @@ class NoTokenIdError(TokenIdError, AttributeError):
 
 class ExpiredTokenIdError(TokenIdError):
     """Exception that rises when the used token id is expired."""
+
+
+class UnfinishedAuthenticationError(TokenIdError):
+    """Exception that rises when the used token id is not finished
+    authentication.
+
+    """
 
 
 class MasterKeyError(Exception):
