@@ -118,7 +118,7 @@ Changelog
 Version 0.1.1
 `````````````
 
-To be released.
+Released on April 22, 2014.
 
 - Fixed Python 2 incompatibility.
 - Added warning for non-SSL server URL.
