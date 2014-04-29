@@ -121,6 +121,7 @@ Version 0.2.0
 To be released
 
 - Added handling of unfinished authentication error.
+- Added handling of incompatible protocol version.
 
 
 Version 0.1.1

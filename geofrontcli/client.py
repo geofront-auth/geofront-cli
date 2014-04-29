@@ -80,6 +80,7 @@ class Client(object):
                 )
             except ValueError:
                 raise ProtocolVersionError(
+                    None,
                     'the protocol version number the server sent is not '
                     'a valid format: ' + repr(server_version)
                 )
@@ -88,11 +89,13 @@ class Client(object):
                         server_version_info <=
                         MAX_PROTOCOL_VERSION):
                     raise ProtocolVersionError(
+                        server_version_info,
                         'the server protocol version ({0}) is '
                         'incompatible'.format(server_version)
                     )
         else:
             raise ProtocolVersionError(
+                None,
                 'the server did not send the protocol version '
                 '(X-Geofront-Version)'
             )
@@ -275,6 +278,20 @@ class PublicKeyDict(collections.MutableMapping):
 
 class ProtocolVersionError(Exception):
     """Exception that rises when the server version is not compatibile."""
+
+    #: (:class:`tuple`) The protocol version triple the server sent.
+    #: Might be :const:`None`.
+    server_version_info = None
+
+    def __init__(self, server_version_info, *args, **kwargs):
+        super(ProtocolVersionError, self).__init__(*args, **kwargs)
+        self.server_version_info = server_version_info
+
+    @property
+    def server_version(self):
+        """(:class:`str`) The server version in string."""
+        v = self.server_version_info
+        return v and '{0}.{1}.{2}'.format(*v)
 
 
 class TokenIdError(Exception):

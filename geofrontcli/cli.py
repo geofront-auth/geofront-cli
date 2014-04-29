@@ -14,8 +14,8 @@ from dirspec.basedir import load_config_paths, save_config_path
 from six.moves import input
 
 from .client import (REMOTE_PATTERN, Client, ExpiredTokenIdError,
-                     NoTokenIdError, RemoteError, TokenIdError,
-                     UnfinishedAuthenticationError)
+                     NoTokenIdError, ProtocolVersionError, RemoteError,
+                     TokenIdError, UnfinishedAuthenticationError)
 from .key import PublicKey
 
 
@@ -337,4 +337,8 @@ def main(args=None):
                         'Try `{0} authenticate` command.'.format(parser.prog))
         except ExpiredTokenIdError:
             parser.exit('Authentication renewal required.\n'
-                        'Try `{0} authenticate` command.')
+                        'Try `{0} authenticate` command.'.format(parser.prog))
+        except ProtocolVersionError as e:
+            parser.exit('geofront-cli seems incompatible with the server.\n'
+                        'Try `pip install --upgrade geofront-cli` command.\n'
+                        'The server version is {0}.'.format(e.server_version))
