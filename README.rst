@@ -115,7 +115,7 @@ __ http://dahlia.kr/
 Changelog
 ---------
 
-Version 0.1.2
+Version 0.2.0
 `````````````
 
 To be released
