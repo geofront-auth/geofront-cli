@@ -91,6 +91,17 @@ command instead of vanilla ``ssh``:
     * Documentation:  https://help.ubuntu.com/
    ubuntu@web-1:~$ 
 
+There is ``geofront-cli scp`` command as well, which is corresponding
+to ``scp``:
+
+.. code-block:: console
+
+   $ geofront-cli scp file.txt web-1:file.txt
+   file.txt                                      100% 3157     3.1KB/s   00:00
+   $ geofront-cli scp -r web-1:path/etc/apt ./
+   sources.list                                  100% 3157     3.1KB/s   00:00
+   trusted.gpg                                   100%   14KB  13.9KB/s   00:00
+
 
 Missing features
 ----------------
@@ -120,6 +131,7 @@ Version 0.2.1
 
 To be released.
 
+- Added ``geofront-cli scp`` command.
 - Added the short option ``-S`` for ``--ssh``.
 
 
