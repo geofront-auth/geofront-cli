@@ -120,6 +120,9 @@ Version 0.2.1
 
 To be released.
 
+- Added the short option ``-S`` for ``--ssh``.
+
+
 Version 0.2.0
 `````````````
 

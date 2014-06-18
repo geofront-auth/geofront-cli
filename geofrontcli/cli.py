@@ -31,7 +31,7 @@ except subprocess.CalledProcessError:
 
 parser = argparse.ArgumentParser(description='Geofront client utility')
 parser.add_argument(
-    '--ssh',
+    '-S', '--ssh',
     default=SSH_PROGRAM,
     required=not SSH_PROGRAM,
     help='ssh client to use' + (' [%(default)s]' if SSH_PROGRAM else '')
