@@ -220,7 +220,7 @@ def authorize(args):
     try:
         client.authorize(args.remote)
     except RemoteError as e:
-        parser.error(str(e))
+        print(e, file=sys.stderr)
         if args.debug:
             raise
 
@@ -269,7 +269,7 @@ def colonize(args):
     try:
         options = get_ssh_options(remote)
     except ValueError as e:
-        parser.error(str(e))
+        colonize.error(str(e))
     cmd = [args.ssh]
     if args.identity_file:
         cmd.extend(['-i', args.identity_file])
@@ -299,7 +299,7 @@ def ssh(args):
         try:
             remote = client.authorize(args.remote)
         except RemoteError as e:
-            parser.error(str(e))
+            ssh.error(str(e))
             if args.debug:
                 raise
         except TokenIdError:
@@ -310,7 +310,7 @@ def ssh(args):
     try:
         options = get_ssh_options(remote)
     except ValueError as e:
-        parser.error(str(e))
+        ssh.error(str(e))
     subprocess.call([args.ssh] + options)
 
 
