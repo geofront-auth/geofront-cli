@@ -23,8 +23,6 @@ install_requires = [
     'six',
     'enum34',
     'keyring >= 3.7',
-    'dirspec >= 13.08'
-    # require --allow-external dirspec --allow-unverified dirspec
 ]
 
 if sys.version_info < (2, 7):

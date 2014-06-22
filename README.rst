@@ -10,18 +10,12 @@ Installation
 ------------
 
 It is available on PyPI__, so you can install it using ``pip`` installer.
-Though you have to specify ``--allow-external`` and ``--allow-unverified``
-options (related issues: 1_, 2_).
 
 .. code-block:: console
 
-   $ pip install --allow-external dirspec \
-                 --allow-unverified dirspec \
-                 geofront-cli
+   $ pip install geofront-cli
 
 __ https://pypi.python.org/pypi/geofront-cli
-.. _1: http://stackoverflow.com/q/23014238/383405
-.. _2: https://bugs.launchpad.net/dirspec/+bug/1298163
 
 
 Getting started
@@ -133,6 +127,10 @@ To be released.
 
 - Added ``geofront-cli scp`` command.
 - Added the short option ``-S`` for ``--ssh``.
+- It becomes to no more depend on dirspec_.  Instead it's simply bundled
+  together.
+
+.. _dirspec: https://pypi.python.org/pypi/dirspec
 
 
 Version 0.2.0
