@@ -1,6 +1,13 @@
 Geofront CLI client
 ===================
 
+.. image:: https://badge.fury.io/py/geofront-cli.svg?
+   :target: https://pypi.python.org/pypi/geofront-cli
+   :alt: Latest PyPI version
+
+.. image:: https://travis-ci.org/spoqa/geofront-cli.svg?
+   :target: https://travis-ci.org/spoqa/geofront-cli
+
 It provides a CLI client for Geofront_, a simple SSH key management server.
 
 .. _Geofront: https://geofront.readthedocs.org/

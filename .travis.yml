@@ -1,0 +1,14 @@
+language: python
+python:
+- pypy
+- 2.6
+- 2.7
+- 3.2
+- 3.3
+- 3.4
+install:
+- pip install -e .
+- pip install flake8 pytest testtools
+script:
+- py.test --durations=10
+- flake8 geofrontcli
