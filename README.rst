@@ -136,6 +136,7 @@ To be released.
 - Added the short option ``-S`` for ``--ssh``.
 - It becomes to no more depend on dirspec_.  Instead it's simply bundled
   together.
+- ``geofront-cli`` now prints a usage description when no subcommand specified.
 
 .. _dirspec: https://pypi.python.org/pypi/dirspec
 

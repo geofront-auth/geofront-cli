@@ -421,3 +421,5 @@ def main(args=None):
             parser.exit('geofront-cli seems incompatible with the server.\n'
                         'Try `pip install --upgrade geofront-cli` command.\n'
                         'The server version is {0}.'.format(e.server_version))
+    else:
+        parser.print_usage()
