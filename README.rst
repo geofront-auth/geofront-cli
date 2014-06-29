@@ -130,7 +130,7 @@ Changelog
 Version 0.2.1
 `````````````
 
-To be released.
+Released on June 29, 2014.
 
 - Added ``geofront-cli scp`` command.
 - Added the short option ``-S`` for ``--ssh``.
