@@ -17,6 +17,7 @@ from .client import (REMOTE_PATTERN, Client, ExpiredTokenIdError,
                      NoTokenIdError, ProtocolVersionError, RemoteError,
                      TokenIdError, UnfinishedAuthenticationError)
 from .key import PublicKey
+from .version import VERSION
 
 
 CONFIG_RESOURCE = 'geofront-cli'
@@ -43,6 +44,8 @@ parser.add_argument(
     help='ssh client to use' + (' [%(default)s]' if SSH_PROGRAM else '')
 )
 parser.add_argument('-d', '--debug', action='store_true', help='debug mode')
+parser.add_argument('-v', '--version', action='version',
+                    version='%(prog)s ' + VERSION)
 subparsers = parser.add_subparsers()
 
 
