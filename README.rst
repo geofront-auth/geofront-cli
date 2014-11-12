@@ -133,6 +133,11 @@ Version 0.2.2
 To be released.
 
 - Added ``-v``/``--version`` option.
+- Fixed an ``AttributeError`` during handling error from server.
+  [`#2`__, `#3`__ by Lee Jaeyoung]
+
+__ https://github.com/spoqa/geofront-cli/issues/2
+__ https://github.com/spoqa/geofront-cli/pull/3
 
 
 Version 0.2.1
