@@ -110,7 +110,7 @@ class Client(object):
                 raise ExpiredTokenIdError('token id seems expired')
             elif response.code == 412 and error == 'unfinished-authentication':
                 raise UnfinishedAuthenticationError(body['message'])
-            buffered = io.ByteIO(read)
+            buffered = io.BytesIO(read)
             yield buffered
             buffered.close()
             return
