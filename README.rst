@@ -130,7 +130,7 @@ Changelog
 Version 0.2.2
 `````````````
 
-To be released.
+Released on November 14, 2014.
 
 - Added ``-v``/``--version`` option.
 - Fixed an ``AttributeError`` during handling error from server.
