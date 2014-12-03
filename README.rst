@@ -107,7 +107,6 @@ to ``scp``:
 Missing features
 ----------------
 
-- Wrapper around ``scp``
 - Shortcut for ``geofront-cli ssh`` command
 - Make ``geofront-cli ssh`` similar to ``ssh``
 - Autocompletion
