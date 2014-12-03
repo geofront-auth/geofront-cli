@@ -19,7 +19,8 @@ from six.moves.urllib.request import Request, urlopen
 from .key import PublicKey
 from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
 
-__all__ = ('REMOTE_PATTERN', 'Client', 'ExpiredTokenIdError',
+__all__ = ('REMOTE_PATTERN', 'BufferedResponse',
+           'Client', 'ExpiredTokenIdError',
            'MasterKeyError', 'NoTokenIdError', 'ProtocolVersionError',
            'RemoteAliasError', 'RemoteError', 'RemoteStateError',
            'TokenIdError', 'UnfinishedAuthenticationError',
@@ -110,7 +111,7 @@ class Client(object):
                 raise ExpiredTokenIdError('token id seems expired')
             elif response.code == 412 and error == 'unfinished-authentication':
                 raise UnfinishedAuthenticationError(body['message'])
-            buffered = io.BytesIO(read)
+            buffered = BufferedResponse(response.code, response.headers, read)
             yield buffered
             buffered.close()
             return
@@ -201,6 +202,18 @@ class Client(object):
         return '{0.__module__}.{0.__name__}({1!r})'.format(
             type(self), self.server_url
         )
+
+
+class BufferedResponse(io.BytesIO):
+    """:class:`io.BytesIO` subclass that mimics some interface of
+    :class:`http.client.HTTPResponse`.
+
+    """
+
+    def __init__(self, code, headers, *args, **kwargs):
+        super(BufferedResponse, self).__init__(*args, **kwargs)
+        self.code = code
+        self.headers = headers
 
 
 class PublicKeyDict(collections.MutableMapping):

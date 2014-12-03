@@ -132,6 +132,11 @@ Version 0.2.3
 
 To be released.
 
+- Fixed an ``AttributeError`` during handling error sent by server.
+  [`#4`__]
+
+__ https://github.com/spoqa/geofront-cli/issues/4
+
 
 Version 0.2.2
 `````````````
