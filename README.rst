@@ -127,6 +127,12 @@ __ http://dahlia.kr/
 Changelog
 ---------
 
+Version 0.2.3
+`````````````
+
+To be released.
+
+
 Version 0.2.2
 `````````````
 
