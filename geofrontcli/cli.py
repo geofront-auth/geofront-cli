@@ -23,15 +23,17 @@ from .version import VERSION
 CONFIG_RESOURCE = 'geofront-cli'
 SERVER_CONFIG_FILENAME = 'server'
 
+WHICH_CMD = 'where' if sys.platform == 'win32' else 'which'
+
 SSH_PROGRAM = None
 try:
-    SSH_PROGRAM = subprocess.check_output(['which', 'ssh']).strip() or None
+    SSH_PROGRAM = subprocess.check_output([WHICH_CMD, 'ssh']).strip() or None
 except subprocess.CalledProcessError:
     pass
 
 SCP_PROGRAM = None
 try:
-    SCP_PROGRAM = subprocess.check_output(['which', 'scp']).strip() or None
+    SCP_PROGRAM = subprocess.check_output([WHICH_CMD, 'scp']).strip() or None
 except subprocess.CalledProcessError:
     pass
 
