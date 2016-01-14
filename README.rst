@@ -126,10 +126,10 @@ __ http://dahlia.kr/
 Changelog
 ---------
 
-Version 0.2.3
+Version 0.3.0
 `````````````
 
-To be released.
+Released on January 15, 2016.
 
 - Fixed an ``AttributeError`` during handling error sent by server.
   [`#4`__]
