@@ -118,7 +118,7 @@ Author and license
 `Hong Minhee`__ wrote geofront-cli, and Spoqa_ maintains it.
 It is licensed under GPLv3_ or later.
 
-__ http://dahlia.kr/
+__ https://hongminhee.org/
 .. _Spoqa: http://www.spoqa.com/
 .. _GPLv3: http://www.gnu.org/licenses/gpl-3.0.html
 

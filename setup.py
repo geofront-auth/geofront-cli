@@ -36,7 +36,7 @@ setup(
     long_description=readme(),
     url='https://github.com/spoqa/geofront-cli',
     author='Hong Minhee',
-    author_email='minhee' '@' 'dahlia.kr',
+    author_email='hongminhee' '@' 'member.fsf.org',
     maintainer='Spoqa',
     maintainer_email='dev' '@' 'spoqa.com',
     license='GPLv3 or later',
