@@ -15,7 +15,7 @@ VERSION = '{0}.{1}.{2}'.format(*VERSION_INFO)
 MIN_PROTOCOL_VERSION = (0, 2, 0)
 
 #: (:class:`tuple`) The maximum compatible version of server protocol.
-MAX_PROTOCOL_VERSION = (0, 3, 999)
+MAX_PROTOCOL_VERSION = (0, 4, 999)
 
 
 if __name__ == '__main__':

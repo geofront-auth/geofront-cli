@@ -131,6 +131,8 @@ Version 0.3.1
 
 To be released.
 
+- Forward compatibility with Geofront 0.4.
+
 
 Version 0.3.0
 `````````````
