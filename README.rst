@@ -129,7 +129,7 @@ Changelog
 Version 0.3.1
 `````````````
 
-To be released.
+Released on May 28, 2016.
 
 - Forward compatibility with Geofront 0.4.
 
