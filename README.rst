@@ -129,7 +129,7 @@ Changelog
 Version 0.3.2
 `````````````
 
-To be released.
+Released on May 31, 2016.
 
 - Fixed ``ImportError`` on Python 2.6.
 
