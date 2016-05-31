@@ -131,6 +131,8 @@ Version 0.3.2
 
 To be released.
 
+- Fixed ``ImportError`` on Python 2.6.
+
 
 Version 0.3.1
 `````````````

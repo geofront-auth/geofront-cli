@@ -21,12 +21,18 @@ def readme():
 
 install_requires = [
     'six',
-    'enum34',
-    'keyring >= 3.7',
 ]
 
+if sys.version_info < (3, 4):
+    install_requires.append('enum34')
+
 if sys.version_info < (2, 7):
-    install_requires.append('argparse')
+    install_requires.extend([
+        'keyring >= 3.7, < 6.0',
+        'argparse',
+    ])
+else:
+    install_requires.append('keyring >= 3.7')
 
 
 setup(
