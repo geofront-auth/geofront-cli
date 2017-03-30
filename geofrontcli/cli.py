@@ -5,6 +5,7 @@
 from __future__ import print_function
 
 import argparse
+import logging
 import os.path
 import subprocess
 import sys
@@ -413,6 +414,16 @@ for p in authenticate, start, ssh, scp:
 
 def main(args=None):
     args = parser.parse_args(args)
+    log_handler = logging.StreamHandler(sys.stdout)
+    local = logging.getLogger('geofrontcli')
+    if args.debug:
+        root = logging.getLogger()
+        root.setLevel(logging.INFO)
+        root.addHandler(log_handler)
+        local.setLevel(logging.DEBUG)
+    else:
+        local.setLevel(logging.INFO)
+    local.addHandler(log_handler)
     if getattr(args, 'function', None):
         try:
             args.function(args)

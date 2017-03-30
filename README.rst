@@ -131,6 +131,8 @@ Version 0.3.3
 
 To be released.
 
+- Now ``-d``/``--debug`` option prints more debug logs.
+
 
 Version 0.3.2
 `````````````
