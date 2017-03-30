@@ -129,7 +129,7 @@ Changelog
 Version 0.3.3
 `````````````
 
-To be released.
+Released on Match 30, 2017.
 
 - Now ``-d``/``--debug`` option prints more debug logs.
 - Fixed `system errors during getting/setting password through keyring/Keychain
