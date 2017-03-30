@@ -132,6 +132,10 @@ Version 0.3.3
 To be released.
 
 - Now ``-d``/``--debug`` option prints more debug logs.
+- Fixed `system errors during getting/setting password through keyring/Keychain
+  on macOS due to some unsigned Python executables`__.
+
+__ https://github.com/jaraco/keyring/issues/219
 
 
 Version 0.3.2

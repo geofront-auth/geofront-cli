@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import argparse
 import logging
+import os
 import os.path
 import subprocess
 import sys
@@ -412,6 +413,42 @@ for p in authenticate, start, ssh, scp:
     )
 
 
+def fix_mac_codesign():
+    """If the running Python interpreter isn't property signed on macOS
+    it's unable to get/set password using keyring from Keychain.
+
+    In such case, we need to sign the interpreter first.
+
+    https://github.com/jaraco/keyring/issues/219
+
+    """
+    global fix_mac_codesign
+    logger = logging.getLogger(__name__ + '.fix_mac_codesign')
+    p = subprocess.Popen(['codesign', '-dvvvvv', sys.executable],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+
+    def prepend_lines(c, text):
+        return ''.join(c + l for l in text.splitlines(True))
+    logger.debug('codesign -dvvvvv %s:\n%s\n%s',
+                 sys.executable,
+                 prepend_lines('| ', stdout),
+                 prepend_lines('> ', stderr))
+    if b'\nSignature=' in stderr:
+        logger.debug('%s: already signed', sys.executable)
+        return
+    logger.info('%s: not signed yet; try signing...', sys.executable)
+    p = subprocess.Popen(['codesign', '-f', '-s', '-', sys.executable],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    os.waitpid(p.pid, 0)
+    logger.debug('%s: signed\n%s\n%s',
+                 sys.executable,
+                 prepend_lines('| ', stdout),
+                 prepend_lines('> ', stderr))
+    logger.debug('respawn the equivalent process...')
+    raise SystemExit(subprocess.call(sys.argv))
+
+
 def main(args=None):
     args = parser.parse_args(args)
     log_handler = logging.StreamHandler(sys.stdout)
@@ -424,6 +461,8 @@ def main(args=None):
     else:
         local.setLevel(logging.INFO)
     local.addHandler(log_handler)
+    if sys.platform == 'darwin':
+        fix_mac_codesign()
     if getattr(args, 'function', None):
         try:
             args.function(args)
