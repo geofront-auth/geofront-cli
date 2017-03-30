@@ -6,6 +6,7 @@ import collections
 import contextlib
 import io
 import json
+import logging
 import re
 import sys
 import uuid
@@ -53,11 +54,13 @@ class Client(object):
     public_keys = None
 
     def __init__(self, server_url):
+        self.logger = logging.getLogger(__name__ + '.Client')
         self.server_url = server_url
         self.public_keys = PublicKeyDict(self)
 
     @contextlib.contextmanager
     def request(self, method, url, data=None, headers={}):
+        logger = self.logger.getChild('request')
         if isinstance(url, tuple):
             url = './{0}/'.format('/'.join(url))
         url = urljoin(self.server_url, url)
@@ -72,6 +75,7 @@ class Client(object):
         try:
             response = urlopen(request)
         except HTTPError as e:
+            logger.exception(e)
             response = e
         server_version = response.headers.get('X-Geofront-Version')
         if server_version:
