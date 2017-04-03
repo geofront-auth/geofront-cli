@@ -129,7 +129,7 @@ Changelog
 Version 0.3.4
 `````````````
 
-To be released.
+Released on April 3, 2017.
 
 - Fixed ``UnicodeError`` during signing the running Python 3 executable
   on macOS.
