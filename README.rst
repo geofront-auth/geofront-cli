@@ -131,6 +131,9 @@ Version 0.3.4
 
 To be released.
 
+- Fixed ``UnicodeError`` during signing the running Python 3 executable
+  on macOS.
+
 
 Version 0.3.3
 `````````````

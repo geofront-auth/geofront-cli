@@ -429,6 +429,8 @@ def fix_mac_codesign():
     stdout, stderr = p.communicate()
 
     def prepend_lines(c, text):
+        if not isinstance(text, str):
+            text = text.decode()
         return ''.join(c + l for l in text.splitlines(True))
     logger.debug('codesign -dvvvvv %s:\n%s\n%s',
                  sys.executable,
