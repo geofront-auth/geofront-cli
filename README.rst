@@ -131,6 +131,8 @@ Version 0.4.0
 
 To be released.
 
+- Dropped support of Python 2.6 and 3.2.
+
 
 Version 0.3.4
 `````````````

@@ -20,19 +20,12 @@ def readme():
 
 
 install_requires = [
+    'keyring >= 3.7',
     'six',
 ]
 
 if sys.version_info < (3, 4):
     install_requires.append('enum34')
-
-if sys.version_info < (2, 7):
-    install_requires.extend([
-        'keyring >= 3.7, < 6.0',
-        'argparse',
-    ])
-else:
-    install_requires.append('keyring >= 3.7')
 
 
 setup(
@@ -60,10 +53,8 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',  # noqa: E501
         'Operating System :: POSIX',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
