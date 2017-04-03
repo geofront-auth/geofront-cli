@@ -7,9 +7,5 @@ python:
 - 3.4
 - 3.5
 - 3.6
-install:
-- pip install -e .
-- pip install flake8 pytest testtools
-script:
-- py.test --durations=10
-- flake8 geofrontcli
+install: pip install tox-travis
+script: tox
