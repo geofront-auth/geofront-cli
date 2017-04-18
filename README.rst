@@ -17,12 +17,15 @@ Installation
 ------------
 
 It is available on PyPI__, so you can install it using ``pip`` installer.
+We, however, recommend to use pipsi_ instead so that geofront-cli and its
+dependencies don't make your global site-packages messy.
 
 .. code-block:: console
 
-   $ pip install geofront-cli
+   $ pipsi install geofront-cli
 
 __ https://pypi.python.org/pypi/geofront-cli
+.. _pipsi: https://github.com/mitsuhiko/pipsi
 
 
 Getting started
