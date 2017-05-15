@@ -135,6 +135,10 @@ Version 0.4.0
 To be released.
 
 - Dropped support of Python 2.6 and 3.2.
+- Fixed verification failure of SSL certificates when Python was installed
+  using Homebrew on macOS.  Now it depends on Certifi_.
+
+.. _Certifi: https://github.com/certifi/python-certifi
 
 
 Version 0.3.4
