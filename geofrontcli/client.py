@@ -13,9 +13,10 @@ import uuid
 
 from keyring import get_password, set_password
 from six import string_types
+from six.moves.urllib import request
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.parse import urljoin
-from six.moves.urllib.request import Request, urlopen
+from six.moves.urllib.request import OpenerDirector, Request, urlopen
 
 from .key import PublicKey
 from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
@@ -53,9 +54,22 @@ class Client(object):
     #: (:class:`PublicKeyDict`) Public keys registered to Geofront server.
     public_keys = None
 
-    def __init__(self, server_url):
+    def __init__(self, server_url, opener=None):
         self.logger = logging.getLogger(__name__ + '.Client')
         self.server_url = server_url
+        if opener is None:
+            if request._opener is None:
+                try:
+                    urlopen('')
+                    # urlopen() implicitly initializes the default opener
+                    # if not exists yet.
+                except (ValueError, TypeError):
+                    pass
+            opener = request._opener
+        elif not isinstance(opener, OpenerDirector):
+            raise TypeError('opener must be {0.__module__}.{0.__name__}, not '
+                            '{1!r}'.format(OpenerDirector, opener))
+        self.opener = opener
         self.public_keys = PublicKeyDict(self)
 
     @contextlib.contextmanager
@@ -73,7 +87,7 @@ class Client(object):
         h.update(headers)
         request = Request(url, method=method, data=data, headers=h)
         try:
-            response = urlopen(request)
+            response = self.opener.open(request)
         except HTTPError as e:
             logger.exception(e)
             response = e
