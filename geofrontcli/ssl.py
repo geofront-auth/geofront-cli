@@ -6,8 +6,8 @@ import ssl
 import certifi  # noqa: I902
 from six.moves.urllib.request import HTTPSHandler
 
-__all__ = ('create_https_context', 'get_https_context_factory',
-           'create_urllib_https_handler')
+__all__ = ('create_https_context', 'create_urllib_https_handler',
+           'get_https_context_factory')
 
 
 def get_https_context_factory():
