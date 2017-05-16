@@ -7,6 +7,11 @@ Geofront CLI client
 
 .. image:: https://travis-ci.org/spoqa/geofront-cli.svg?
    :target: https://travis-ci.org/spoqa/geofront-cli
+   :alt: Build status (Travis CI)
+
+.. image:: https://ci.appveyor.com/api/projects/status/wjcgay1b4twffwbc?svg=true
+   :target: https://ci.appveyor.com/project/dahlia/geofront-cli
+   :alt: Build status (AppVeyor)
 
 It provides a CLI client for Geofront_, a simple SSH key management server.
 
