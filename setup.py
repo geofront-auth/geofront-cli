@@ -1,5 +1,6 @@
 import os.path
 import sys
+import warnings
 
 try:
     from setuptools import find_packages, setup
@@ -19,14 +20,25 @@ def readme():
         return ''
 
 
-install_requires = [
+install_requires = {
     'certifi',
     'keyring >= 3.7',
     'six',
-]
+}
+
+below_py34_requires = {
+    'enum34',
+}
+
+win32_requires = {
+    'pypiwin32',
+}
 
 if sys.version_info < (3, 4):
-    install_requires.append('enum34')
+    install_requires.update(below_py34_requires)
+
+if sys.platform == 'win32':
+    install_requires.update(win32_requires)
 
 
 setup(
@@ -45,7 +57,11 @@ setup(
         [console_scripts]
         geofront-cli = geofrontcli.cli:main
     ''',
-    install_requires=install_requires,
+    install_requires=list(install_requires),
+    extras_require={
+        ":python_version<'3.4'": list(below_py34_requires),
+        ":sys_platform=='win32'": list(win32_requires),
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
@@ -66,3 +82,12 @@ setup(
         'Topic :: Utilities'
     ]
 )
+
+
+if 'bdist_wheel' in sys.argv and (
+        below_py34_requires.issubset(install_requires) or
+        win32_requires.issubset(install_requires)):
+    warnings.warn('Building wheels on Windows or using below Python 3.4 is '
+                  'not recommended since platform-specific dependencies can '
+                  'be merged into common dependencies:\n' +
+                  '\n'.join('- ' + i for i in install_requires))
