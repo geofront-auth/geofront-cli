@@ -13,6 +13,7 @@ import sys
 import webbrowser
 
 from dirspec.basedir import load_config_paths, save_config_path
+from iterfzf import iterfzf
 from logging_spinner import SpinnerHandler, UserWaitingFilter
 from six.moves import input
 
@@ -203,6 +204,14 @@ masterkey.add_argument(
 )
 
 
+def align_remote_list(remotes):
+    maxlength = max(map(len, remotes)) if remotes else 0
+    for alias, remote in sorted(remotes.items()):
+        if remote.endswith(':22'):
+            remote = remote[:-3]
+        yield '{0:{1}}  {2}'.format(alias, maxlength, remote)
+
+
 @subparser
 def remotes(args):
     """List available remotes."""
@@ -212,11 +221,8 @@ def remotes(args):
         for alias in sorted(remotes):
             print(alias)
     else:
-        maxlength = max(map(len, remotes)) if remotes else 0
-        for alias, remote in sorted(remotes.items()):
-            if remote.endswith(':22'):
-                remote = remote[:-3]
-            print('{0:{1}}  {2}'.format(alias, maxlength, remote))
+        for line in align_remote_list(remotes):
+            print(line)
 
 
 remotes.add_argument(
@@ -316,9 +322,9 @@ colonize.add_argument('remote', help='the remote alias to colonize')
 
 
 @subparser
-def ssh(args):
+def ssh(args, alias=None):
     """SSH to the remote through Geofront's temporary authorization."""
-    remote = authorize.call(args)
+    remote = authorize.call(args, alias=alias)
     try:
         options = get_ssh_options(remote)
     except ValueError as e:
@@ -389,7 +395,17 @@ scp.add_argument('source', help='the source path to copy')
 scp.add_argument('destination', help='the destination path')
 
 
-for p in authenticate, authorize, start, ssh, scp:
+@subparser
+def go(args):
+    """Select a remote and SSH to it at once (in interactive way)."""
+    client = get_client()
+    remotes = client.remotes
+    chosen = iterfzf(align_remote_list(remotes))
+    alias = chosen.split()[0]
+    ssh.call(args, alias=alias)
+
+
+for p in authenticate, authorize, start, ssh, scp, go:
     p.add_argument(
         '-O', '--no-open-browser',
         dest='open_browser',

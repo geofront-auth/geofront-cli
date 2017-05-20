@@ -100,6 +100,19 @@ command instead of vanilla ``ssh``:
     * Documentation:  https://help.ubuntu.com/
    ubuntu@web-1:~$ 
 
+In most cases, you probably need to list remotes to find an alias to SSH
+before run ``geofront-cli ssh`` command.  ``geofront-cli go`` command is
+a single command for these two actions at once:
+
+.. code-block:: console
+
+   $ geofront-cli go
+   (...interactive fuzzy finder for remotes is shown...)
+   Welcome to Ubuntu 12.04.3 LTS (GNU/Linux 2.6.32-042stab078.27 i686)
+
+    * Documentation:  https://help.ubuntu.com/
+   ubuntu@web-1:~$ 
+
 There is ``geofront-cli scp`` command as well, which is corresponding
 to ``scp``:
 
@@ -140,6 +153,8 @@ Version 0.4.0
 To be released.
 
 - Dropped support of Python 2.6 and 3.2.
+- ``geofront-cli go`` was introduced.  It's an interactive user interface to
+  select a remote and SSH to it at once.
 - Fixed verification failure of SSL certificates when Python was installed
   using Homebrew on macOS.  Now it depends on Certifi_.
 - Now the output list of ``geofront-cli remotes`` is sorted.
