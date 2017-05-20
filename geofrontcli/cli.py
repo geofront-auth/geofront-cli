@@ -208,10 +208,10 @@ def remotes(args):
     client = get_client()
     remotes = client.remotes
     if args.alias:
-        for alias in remotes:
+        for alias in sorted(remotes):
             print(alias)
     else:
-        for alias, remote in remotes.items():
+        for alias, remote in sorted(remotes.items()):
             print('{0}\t{1}'.format(alias, remote))
 
 
