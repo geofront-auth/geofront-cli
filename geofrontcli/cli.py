@@ -213,6 +213,8 @@ def remotes(args):
     else:
         maxlength = max(map(len, remotes)) if remotes else 0
         for alias, remote in sorted(remotes.items()):
+            if remote.endswith(':22'):
+                remote = remote[:-3]
             print('{0:{1}}  {2}'.format(alias, maxlength, remote))
 
 

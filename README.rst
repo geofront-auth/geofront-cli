@@ -145,6 +145,9 @@ To be released.
 - Now the output list of ``geofront-cli remotes`` is sorted.
 - The second column of ``geofront-cli remotes --verbose`` result became
   vertically aligned.
+- The second column of ``geofront-cli remotes --verbose`` result became
+  to omit the port number if it's 22 so that these are easy to copy-and-paste
+  into other SSH programs.
 
 .. _Certifi: https://github.com/certifi/python-certifi
 
