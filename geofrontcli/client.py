@@ -182,32 +182,52 @@ class Client(object):
         addresses.
 
         """
-        path = ('tokens', self.token_id, 'remotes')
-        with self.request('GET', path) as r:
-            assert r.code == 200
-            mimetype, _ = parse_mimetype(r.headers['Content-Type'])
-            assert mimetype == 'application/json'
-            result = json.loads(r.read().decode('utf-8'))
-        fmt = '{0[user]}@{0[host]}:{0[port]}'.format
-        return dict((alias, fmt(remote)) for alias, remote in result.items())
+        logger = self.logger.getChild('remotes')
+        logger.info('Loading the list of remotes from the Geofront server...',
+                    extra={'user_waiting': True})
+        try:
+            path = ('tokens', self.token_id, 'remotes')
+            with self.request('GET', path) as r:
+                assert r.code == 200
+                mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+                assert mimetype == 'application/json'
+                result = json.loads(r.read().decode('utf-8'))
+            fmt = '{0[user]}@{0[host]}:{0[port]}'.format
+            logger.info('Total %d remotes.', len(result),
+                        extra={'user_waiting': False})
+            return dict((alias, fmt(remote))
+                        for alias, remote in result.items())
+        except:
+            logger.info('Failed to fetch the list of remotes.',
+                        extra={'user_waiting': False})
+            raise
 
     def authorize(self, alias):
         """Temporarily authorize you to access the given remote ``alias``.
         A made authorization keeps alive in a minute, and then will be expired.
 
         """
-        path = ('tokens', self.token_id, 'remotes', alias)
-        with self.request('POST', path) as r:
-            mimetype, _ = parse_mimetype(r.headers['Content-Type'])
-            assert mimetype == 'application/json'
-            result = json.loads(r.read().decode('utf-8'))
-            if r.code == 404 and result.get('error') == 'not-found':
-                raise RemoteAliasError(result.get('message'))
-            elif r.code == 500 and result.get('error') == 'connection-failure':
-                raise RemoteStateError(result.get('message'))
-            assert r.code == 200
-            assert result['success'] == 'authorized'
-            return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
+        logger = self.logger.getChild('authorize')
+        logger.info('Letting the Geofront server to authorize you to access '
+                    'to %s...', alias, extra={'user_waiting': True})
+        try:
+            path = ('tokens', self.token_id, 'remotes', alias)
+            with self.request('POST', path) as r:
+                mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+                assert mimetype == 'application/json'
+                result = json.loads(r.read().decode('utf-8'))
+                if r.code == 404 and result.get('error') == 'not-found':
+                    raise RemoteAliasError(result.get('message'))
+                elif (r.code == 500 and
+                      result.get('error') == 'connection-failure'):
+                    raise RemoteStateError(result.get('message'))
+                assert r.code == 200
+                assert result['success'] == 'authorized'
+                return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
+        finally:
+            logger.info('Access to %s has authorized!  The access will be '
+                        'available only for a time.', alias,
+                        extra={'user_waiting': False})
 
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(

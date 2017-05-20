@@ -13,6 +13,7 @@ import sys
 import webbrowser
 
 from dirspec.basedir import load_config_paths, save_config_path
+from logging_spinner import SpinnerHandler, UserWaitingFilter
 from six.moves import input
 
 from .client import (REMOTE_PATTERN, Client, ExpiredTokenIdError,
@@ -457,6 +458,8 @@ def fix_mac_codesign():
 def main(args=None):
     args = parser.parse_args(args)
     log_handler = logging.StreamHandler(sys.stdout)
+    log_handler.addFilter(UserWaitingFilter())
+    spinner_handler = SpinnerHandler(sys.stdout)
     local = logging.getLogger('geofrontcli')
     if args.debug:
         root = logging.getLogger()
@@ -466,6 +469,7 @@ def main(args=None):
     else:
         local.setLevel(logging.INFO)
     local.addHandler(log_handler)
+    local.addHandler(spinner_handler)
     if sys.platform == 'darwin':
         fix_mac_codesign()
     if getattr(args, 'function', None):

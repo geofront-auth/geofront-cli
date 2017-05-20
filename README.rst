@@ -148,6 +148,7 @@ To be released.
 - The second column of ``geofront-cli remotes --verbose`` result became
   to omit the port number if it's 22 so that these are easy to copy-and-paste
   into other SSH programs.
+- Loading spinners became shown when time-taking tasks are running.
 
 .. _Certifi: https://github.com/certifi/python-certifi
 
