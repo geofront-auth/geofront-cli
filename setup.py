@@ -58,6 +58,7 @@ setup(
     entry_points='''
         [console_scripts]
         geofront-cli = geofrontcli.cli:main
+        gfg = geofrontcli.cli:main_go
     ''',
     install_requires=list(install_requires),
     extras_require={

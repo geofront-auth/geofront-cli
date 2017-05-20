@@ -485,3 +485,8 @@ def main(args=None):
                         'The server version is {0}.'.format(e.server_version))
     else:
         parser.print_usage()
+
+
+def main_go():
+    parser.prog = 'geofront-cli'
+    main(['go'])

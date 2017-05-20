@@ -113,6 +113,9 @@ a single command for these two actions at once:
     * Documentation:  https://help.ubuntu.com/
    ubuntu@web-1:~$ 
 
+Note that there's a shortcut command ``gfg`` which is an alias of
+``geofront-cli go``.
+
 There is ``geofront-cli scp`` command as well, which is corresponding
 to ``scp``:
 
@@ -153,8 +156,8 @@ Version 0.4.0
 To be released.
 
 - Dropped support of Python 2.6 and 3.2.
-- ``geofront-cli go`` was introduced.  It's an interactive user interface to
-  select a remote and SSH to it at once.
+- ``geofront-cli go`` command and its alias shortcut ``gfg`` was introduced.
+  It's an interactive user interface to select a remote and SSH to it at once.
 - Fixed verification failure of SSL certificates when Python was installed
   using Homebrew on macOS.  Now it depends on Certifi_.
 - Now the output list of ``geofront-cli remotes`` is sorted.
