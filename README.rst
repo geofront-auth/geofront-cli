@@ -143,6 +143,8 @@ To be released.
 - Fixed verification failure of SSL certificates when Python was installed
   using Homebrew on macOS.  Now it depends on Certifi_.
 - Now the output list of ``geofront-cli remotes`` is sorted.
+- The second column of ``geofront-cli remotes --verbose`` result became
+  vertically aligned.
 
 .. _Certifi: https://github.com/certifi/python-certifi
 

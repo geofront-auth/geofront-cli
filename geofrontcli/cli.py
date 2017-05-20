@@ -211,8 +211,9 @@ def remotes(args):
         for alias in sorted(remotes):
             print(alias)
     else:
+        maxlength = max(map(len, remotes)) if remotes else 0
         for alias, remote in sorted(remotes.items()):
-            print('{0}\t{1}'.format(alias, remote))
+            print('{0:{1}}  {2}'.format(alias, maxlength, remote))
 
 
 remotes.add_argument(
