@@ -223,11 +223,19 @@ class Client(object):
                     raise RemoteStateError(result.get('message'))
                 assert r.code == 200
                 assert result['success'] == 'authorized'
-                return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
-        finally:
+        except TokenIdError:
+            logger.info('Authentication is required.',
+                        extra={'user_waiting': False})
+            raise
+        except:
+            logger.info('Authorization to %s has failed.', alias,
+                        extra={'user_waiting': False})
+            raise
+        else:
             logger.info('Access to %s has authorized!  The access will be '
                         'available only for a time.', alias,
                         extra={'user_waiting': False})
+        return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
 
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(

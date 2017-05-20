@@ -228,18 +228,25 @@ remotes.add_argument(
 
 
 @subparser
-def authorize(args):
+def authorize(args, alias=None):
     """Temporarily authorize you to access the given remote.
     A made authorization keeps alive in a minute, and then will be expired.
 
     """
     client = get_client()
-    try:
-        client.authorize(args.remote)
-    except RemoteError as e:
-        print(e, file=sys.stderr)
-        if args.debug:
-            raise
+    while True:
+        try:
+            remote = client.authorize(alias or args.remote)
+        except RemoteError as e:
+            print(e, file=sys.stderr)
+            if args.debug:
+                raise
+        except TokenIdError:
+            print('Authentication required.', file=sys.stderr)
+            authenticate.call(args)
+        else:
+            break
+    return remote
 
 
 authorize.add_argument(
@@ -311,19 +318,7 @@ colonize.add_argument('remote', help='the remote alias to colonize')
 @subparser
 def ssh(args):
     """SSH to the remote through Geofront's temporary authorization."""
-    while True:
-        client = get_client()
-        try:
-            remote = client.authorize(args.remote)
-        except RemoteError as e:
-            ssh.error(str(e))
-            if args.debug:
-                raise
-        except TokenIdError:
-            print('Authentication required.')
-            authenticate.call(args)
-        else:
-            break
+    remote = authorize.call(args)
     try:
         options = get_ssh_options(remote)
     except ValueError as e:
@@ -337,34 +332,21 @@ ssh.add_argument('remote', help='the remote alias to ssh')
 def parse_scp_path(path, args):
     """Parse remote:path format."""
     if ':' not in path:
-        return None, None, path
+        return None, path
     alias, path = path.split(':', 1)
-    while True:
-        client = get_client()
-        try:
-            remote = client.authorize(alias)
-        except RemoteError as e:
-            print(e, file=sys.stderr)
-            if args.debug:
-                raise
-            raise SystemExit(1)
-        except TokenIdError:
-            print('Authentication required.')
-            authenticate.call(args)
-        else:
-            break
-    return client, remote, path
+    remote = authorize.call(args, alias=alias)
+    return remote, path
 
 
 @subparser
 def scp(args):
     options = []
-    src_client, src_remote, src_path = parse_scp_path(args.source, args)
-    dst_client, dst_remote, dst_path = parse_scp_path(args.destination, args)
-    if src_client and dst_client:
+    src_remote, src_path = parse_scp_path(args.source, args)
+    dst_remote, dst_path = parse_scp_path(args.destination, args)
+    if src_remote and dst_remote:
         scp.error('source and destination cannot be both '
                   'remote paths at a time')
-    elif not (src_client or dst_client):
+    elif not (src_remote or dst_remote):
         scp.error('one of source and destination has to be a remote path')
     if args.ssh:
         options.extend(['-S', args.ssh])
@@ -407,7 +389,7 @@ scp.add_argument('source', help='the source path to copy')
 scp.add_argument('destination', help='the destination path')
 
 
-for p in authenticate, start, ssh, scp:
+for p in authenticate, authorize, start, ssh, scp:
     p.add_argument(
         '-O', '--no-open-browser',
         dest='open_browser',

@@ -23,7 +23,7 @@ def readme():
 install_requires = {
     'certifi',
     'keyring >= 3.7',
-    'logging-spinner',
+    'logging-spinner >= 0.2.1',
     'six',
 }
 
