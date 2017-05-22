@@ -156,7 +156,7 @@ Version 0.4.0
 Released on May 23, 2017.
 
 - Dropped support of Python 2.6 and 3.2.
-- ``geofront-cli go`` command and its alias shortcut ``gfg`` was introduced.
+- ``geofront-cli go`` command and its alias shortcut ``gfg`` were introduced.
   It's an interactive user interface to select a remote and SSH to it at once.
 - Fixed verification failure of SSL certificates when Python was installed
   using Homebrew on macOS.  Now it depends on Certifi_.
