@@ -153,7 +153,7 @@ Changelog
 Version 0.4.0
 `````````````
 
-To be released.
+Released on May 23, 2017.
 
 - Dropped support of Python 2.6 and 3.2.
 - ``geofront-cli go`` command and its alias shortcut ``gfg`` was introduced.
