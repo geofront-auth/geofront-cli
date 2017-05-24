@@ -153,10 +153,13 @@ Changelog
 Version 0.4.1
 `````````````
 
-To be released.
+Released on May 24, 2017.
 
 - Fixed a bug that ``geofront-cli go``/``gfg`` had crashed with
   ``AttributeError`` when a user cancelled (i.e. Ctrl-C) to select a remote.
+  [`#10`__]
+
+__ https://github.com/spoqa/geofront-cli/issues/10
 
 
 Version 0.4.0
