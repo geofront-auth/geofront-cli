@@ -155,6 +155,9 @@ Version 0.4.1
 
 To be released.
 
+- Fixed a bug that ``geofront-cli go``/``gfg`` had crashed with
+  ``AttributeError`` when a user cancelled (i.e. Ctrl-C) to select a remote.
+
 
 Version 0.4.0
 `````````````

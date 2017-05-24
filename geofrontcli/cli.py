@@ -401,6 +401,8 @@ def go(args):
     client = get_client()
     remotes = client.remotes
     chosen = iterfzf(align_remote_list(remotes))
+    if chosen is None:
+        return
     alias = chosen.split()[0]
     ssh.call(args, alias=alias)
 
