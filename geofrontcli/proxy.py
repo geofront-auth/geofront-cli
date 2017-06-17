@@ -45,8 +45,8 @@ def load_proxy_port_map():
 
 
 def save_proxy_port_map(data):
-    config_path = pathlib.Path(save_config_path(CONFIG_RESOURCE).decode()) \
-                  / PROXY_PORT_MAP_FILENAME
+    config_path = (pathlib.Path(save_config_path(CONFIG_RESOURCE).decode())
+                   / PROXY_PORT_MAP_FILENAME)
     with open(config_path, 'w') as f:
         writer = csv.writer(f)
         for key, val in data.items():
