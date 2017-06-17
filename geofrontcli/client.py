@@ -194,11 +194,9 @@ class Client(object):
                 mimetype, _ = parse_mimetype(r.headers['Content-Type'])
                 assert mimetype == 'application/json'
                 result = json.loads(r.read().decode('utf-8'))
-            fmt = '{0[user]}@{0[host]}:{0[port]}'.format
             logger.info('Total %d remotes.', len(result),
                         extra={'user_waiting': False})
-            return dict((alias, fmt(remote))
-                        for alias, remote in result.items())
+            return result
         except:
             logger.info('Failed to fetch the list of remotes.',
                         extra={'user_waiting': False})
