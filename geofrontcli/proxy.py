@@ -19,6 +19,7 @@ from .version import VERSION
 
 __all__ = ('start_ssh_proxy', )
 
+
 CONFIG_RESOURCE = 'geofront-cli'
 PROXY_PORT_MAP_FILENAME = 'proxyports.csv'
 
@@ -34,7 +35,7 @@ def get_unused_port():
 def load_proxy_port_map():
     data = dict()
     for path in load_config_paths(CONFIG_RESOURCE):
-        path = Path(path.decode()) /  PROXY_PORT_MAP_FILENAME
+        path = Path(path.decode()) / PROXY_PORT_MAP_FILENAME
         if path.is_file():
             with open(path) as f:
                 for row in csv.reader(f):
@@ -67,6 +68,7 @@ def get_port_for_remote(host):
 
 
 async def pipe(url, remote, ssh_executable):
+    """The main duplex pipe task that proxies the incoming SSH traffic via WebSockets."""
     loop = asyncio.get_event_loop()
     headers = {
         'User-Agent': 'geofront-cli/{0} (Python-asyncio/{1})'.format(
@@ -75,6 +77,7 @@ async def pipe(url, remote, ssh_executable):
     }
 
     async def handle_ssh_sock(ws, ssh_sock):
+        """A sub-task that proxies the outgoing SSH traffic via WebSocket."""
         while True:
             try:
                 data = await loop.sock_recv(ssh_sock, 4096)
@@ -85,6 +88,7 @@ async def pipe(url, remote, ssh_executable):
             ws.send_bytes(data)
 
     async def handle_subproc(cmd, pipe_task):
+        """Launch the local SSH agent and wait until it terminates."""
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd,
@@ -164,8 +168,10 @@ async def pipe(url, remote, ssh_executable):
         session.close()
         loop.stop()
 
+
 @aiotools.actxmgr
 async def serve_proxy(loop, pidx, args):
+    """The initialize and shtudown routines for the local SSH proxy."""
     pipe_task = None
     try:
         pipe_task = loop.create_task(pipe(*args))
@@ -174,6 +180,7 @@ async def serve_proxy(loop, pidx, args):
         if pipe_task and not pipe_task.done():
             pipe_task.cancel()
             await pipe_task
+
 
 def start_ssh_proxy(url, remote, ssh_executable):
     aiotools.start_server(serve_proxy, args=(url, remote, ssh_executable), num_proc=1)
