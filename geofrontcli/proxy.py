@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_unused_port():
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as temp_sock:
-        temp_sock.bind(('localhost', 0))
-        return temp_sock.getsockname()[1]
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('localhost', 0))
+        return s.getsockname()[1]
 
 
 def load_proxy_port_map():
@@ -50,7 +50,7 @@ def save_proxy_port_map(data):
         writer = csv.writer(f)
         for key, val in data.items():
             writer.writerow((key, val))
-    logger.info(f'To change/delete port-host mapping, check out {config_path}.',
+    logger.info(f'To modify port-host mapping, check out {config_path}.',
                 extra={'user_waiting': False})
 
 
@@ -68,7 +68,7 @@ def get_port_for_remote(host):
 
 
 async def pipe(url, remote, ssh_executable):
-    """The main duplex pipe task that proxies the incoming SSH traffic via WebSockets."""
+    """The main task that proxies the incoming SSH traffic via WebSockets."""
     loop = asyncio.get_event_loop()
     headers = {
         'User-Agent': 'geofront-cli/{0} (Python-asyncio/{1})'.format(
@@ -121,7 +121,8 @@ async def pipe(url, remote, ssh_executable):
         try:
             local_sock.bind(('localhost', bind_port))
         except OSError:
-            logger.error(f'Cannot bind to port {bind_port}!', extra={'user_waiting': False})
+            logger.error(f'Cannot bind to port {bind_port}!',
+                         extra={'user_waiting': False})
             return
         local_sock.listen(1)
         logger.info(f'Connecting to local SSH proxy at port {bind_port}...',
@@ -133,7 +134,8 @@ async def pipe(url, remote, ssh_executable):
                 '-p', str(bind_port),
                 'localhost',
             ]
-            subproc_task = loop.create_task(handle_subproc(cmd, asyncio.Task.current_task()))
+            subproc_task = loop.create_task(
+                handle_subproc(cmd, asyncio.Task.current_task()))
             await asyncio.sleep(0)  # required!
             ssh_sock, _ = await loop.sock_accept(local_sock)
             ssh_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -183,4 +185,6 @@ async def serve_proxy(loop, pidx, args):
 
 
 def start_ssh_proxy(url, remote, ssh_executable):
-    aiotools.start_server(serve_proxy, args=(url, remote, ssh_executable), num_proc=1)
+    aiotools.start_server(serve_proxy,
+                          args=(url, remote, ssh_executable),
+                          num_proc=1)

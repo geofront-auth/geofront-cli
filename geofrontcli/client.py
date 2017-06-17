@@ -237,7 +237,6 @@ class Client(object):
             logger.info('Access to %s has authorized!  The access will be '
                         'available only for a time.', alias,
                         extra={'user_waiting': False})
-        #return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
         return result['remote']
 
     if sys.version_info >= (3, 6):  # pragma: no cover

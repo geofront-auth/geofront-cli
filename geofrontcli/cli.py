@@ -263,16 +263,7 @@ authorize.add_argument(
 
 def mangle_ssh_args(remote):
     """Translate the given ``remote`` to a corresponding :program:`ssh`
-    arguments.  For example, it returns the following list for ``'user@host'``::
-
-        ['-l', 'user', 'host']
-
-    The remote can contain the port number or omit the user login as well
-    e.g. ``'host:22'``::
-
-        ['-p', '22', 'host']
-
-    """
+    arguments including the login name and the port number explicitly."""
     return [
         '-l', remote['user'],
         '-p', str(remote['port']),
@@ -313,6 +304,7 @@ colonize.add_argument('remote', help='the remote alias to colonize')
 @subparser
 def ssh(args, alias=None):
     """SSH to the remote through Geofront's temporary authorization."""
+    logger = logging.getLogger('geofrontcli')
     if args.proxy and sys.version_info < (3, 6):
         logger.error('To use the SSH proxy, you need to run geofront-cli on '
                      'Python 3.6 or higher.',
