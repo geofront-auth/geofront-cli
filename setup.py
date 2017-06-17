@@ -32,12 +32,20 @@ below_py34_requires = {
     'enum34',
 }
 
+py36_or_higher_requires = {
+    'aiohttp ~= 2.1.0',
+    'aiotools >= 0.3',
+}
+
 win32_requires = {
     'pypiwin32',
 }
 
 if sys.version_info < (3, 4):
     install_requires.update(below_py34_requires)
+
+if sys.version_info >= (3, 6):
+    install_requires.update(py36_or_higher_requires)
 
 if sys.platform == 'win32':
     install_requires.update(win32_requires)
@@ -63,6 +71,7 @@ setup(
     install_requires=list(install_requires),
     extras_require={
         ":python_version<'3.4'": list(below_py34_requires),
+        ":python_version>='3.6'": list(py36_or_higher_requires),
         ":sys_platform=='win32'": list(win32_requires),
     },
     classifiers=[

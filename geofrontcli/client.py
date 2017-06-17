@@ -20,6 +20,8 @@ from six.moves.urllib.request import OpenerDirector, Request, build_opener
 from .key import PublicKey
 from .ssl import create_urllib_https_handler
 from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
+if sys.version_info >= (3, 6):  # pragma: no cover
+    from .proxy import start_ssh_proxy
 
 __all__ = ('REMOTE_PATTERN', 'BufferedResponse',
            'Client', 'ExpiredTokenIdError',
@@ -235,7 +237,21 @@ class Client(object):
             logger.info('Access to %s has authorized!  The access will be '
                         'available only for a time.', alias,
                         extra={'user_waiting': False})
-        return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
+        #return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
+        return result['remote']
+
+    if sys.version_info >= (3, 6):  # pragma: no cover
+        def ssh_proxy(self, remote, ssh_executable, alias):
+            logger = self.logger.getChild('ssh_proxy')
+            try:
+                path = ('ws', 'tokens', self.token_id, 'remotes', alias, 'ssh')
+                url = './{0}/'.format('/'.join(path))
+                url = urljoin(self.server_url, url)
+            except TokenIdError:
+                logger.info('Authentication is required.',
+                            extra={'user_waiting': False})
+                raise
+            start_ssh_proxy(url, remote, ssh_executable)
 
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(

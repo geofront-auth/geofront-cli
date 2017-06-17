@@ -261,9 +261,9 @@ authorize.add_argument(
 )
 
 
-def get_ssh_options(remote):
+def mangle_ssh_args(remote):
     """Translate the given ``remote`` to a corresponding :program:`ssh`
-    options.  For example, it returns the following list for ``'user@host'``::
+    arguments.  For example, it returns the following list for ``'user@host'``::
 
         ['-l', 'user', 'host']
 
@@ -273,18 +273,11 @@ def get_ssh_options(remote):
         ['-p', '22', 'host']
 
     """
-    remote_match = REMOTE_PATTERN.match(remote)
-    if not remote_match:
-        raise ValueError('invalid remote format: ' + str(remote))
-    options = []
-    user = remote_match.group('user')
-    if user:
-        options.extend(['-l', user])
-    port = remote_match.group('port')
-    if port:
-        options.extend(['-p', port])
-    options.append(remote_match.group('host'))
-    return options
+    return [
+        '-l', remote['user'],
+        '-p', str(remote['port']),
+        remote['host'],
+    ]
 
 
 @subparser
@@ -296,14 +289,10 @@ def colonize(args):
     """
     client = get_client()
     remote = client.remotes.get(args.remote, args.remote)
-    try:
-        options = get_ssh_options(remote)
-    except ValueError as e:
-        colonize.error(str(e))
     cmd = [args.ssh]
     if args.identity_file:
         cmd.extend(['-i', args.identity_file])
-    cmd.extend(options)
+    cmd.extend(mangle_ssh_args(remote))
     cmd.extend([
         'mkdir', '~/.ssh', '&>', '/dev/null', '||', 'true', ';',
         'echo', repr(str(client.master_key)),
@@ -324,15 +313,22 @@ colonize.add_argument('remote', help='the remote alias to colonize')
 @subparser
 def ssh(args, alias=None):
     """SSH to the remote through Geofront's temporary authorization."""
+    if args.proxy and sys.version_info < (3, 6):
+        logger.error('To use the SSH proxy, you need to run geofront-cli on '
+                     'Python 3.6 or higher.',
+                     extra={'user_waiting': False})
     remote = authorize.call(args, alias=alias)
-    try:
-        options = get_ssh_options(remote)
-    except ValueError as e:
-        ssh.error(str(e))
-    subprocess.call([args.ssh] + options)
+    if args.proxy:
+        client = get_client()
+        client.ssh_proxy(remote, args.ssh, alias or args.remote)
+    else:
+        subprocess.call([args.ssh] + mangle_ssh_args(remote))
 
 
 ssh.add_argument('remote', help='the remote alias to ssh')
+ssh.add_argument('-p', '--proxy', action='store_true', default=False,
+                 help='use a proxy tunneled via HTTPS to ssh into servers '
+                      'inside remote private networks')
 
 
 def parse_scp_path(path, args):
