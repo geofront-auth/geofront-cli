@@ -3,16 +3,16 @@
 
 """
 import asyncio
-from contextlib import closing
+import contextlib
 import csv
 import logging
-from pathlib import Path
+import pathlib
 import socket
 import sys
 import traceback
 
-import aiohttp
-import aiotools
+from aiohttp import ClientError, ClientSession, WSMsgType
+from aiotools import actxmgr, start_server
 from dirspec.basedir import load_config_paths, save_config_path
 
 from .version import VERSION
@@ -27,7 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_unused_port():
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    with contextlib.closing(s):
         s.bind(('localhost', 0))
         return s.getsockname()[1]
 
@@ -35,7 +36,7 @@ def get_unused_port():
 def load_proxy_port_map():
     data = dict()
     for path in load_config_paths(CONFIG_RESOURCE):
-        path = Path(path.decode()) / PROXY_PORT_MAP_FILENAME
+        path = pathlib.Path(path.decode()) / PROXY_PORT_MAP_FILENAME
         if path.is_file():
             with open(path) as f:
                 for row in csv.reader(f):
@@ -44,7 +45,7 @@ def load_proxy_port_map():
 
 
 def save_proxy_port_map(data):
-    config_path = Path(save_config_path(CONFIG_RESOURCE).decode()) \
+    config_path = pathlib.Path(save_config_path(CONFIG_RESOURCE).decode()) \
                   / PROXY_PORT_MAP_FILENAME
     with open(config_path, 'w') as f:
         writer = csv.writer(f)
@@ -110,7 +111,7 @@ async def pipe(url, remote, ssh_executable):
                 extra={'user_waiting': True})
 
     # TODO: response header version check?
-    session = aiohttp.ClientSession()
+    session = ClientSession()
     try:
         sock_type = socket.SOCK_STREAM
         if hasattr(socket, 'SOCK_NONBLOCK'):  # only for Linux
@@ -142,15 +143,15 @@ async def pipe(url, remote, ssh_executable):
             local_sock.close()  # used only once
             ssh_reader_task = loop.create_task(handle_ssh_sock(ws, ssh_sock))
             async for msg in ws:
-                if msg.type == aiohttp.WSMsgType.BINARY:
+                if msg.type == WSMsgType.BINARY:
                     await loop.sock_sendall(ssh_sock, msg.data)
-                elif msg.type == aiohttp.WSMsgType.CLOSED:
+                elif msg.type == WSMsgType.CLOSED:
                     break
-                elif msg.type == aiohttp.WSMsgType.ERROR:
+                elif msg.type == WSMsgType.ERROR:
                     logger.error('Server disconnected unexpectedly.',
                                  extra={'user_waiting': False})
                     break
-    except aiohttp.ClientError:
+    except ClientError:
         logger.error('Connection error!', extra={'user_waiting': False})
         raise
     except asyncio.CancelledError:
@@ -171,7 +172,7 @@ async def pipe(url, remote, ssh_executable):
         loop.stop()
 
 
-@aiotools.actxmgr
+@actxmgr
 async def serve_proxy(loop, pidx, args):
     """The initialize and shtudown routines for the local SSH proxy."""
     pipe_task = None
@@ -185,6 +186,6 @@ async def serve_proxy(loop, pidx, args):
 
 
 def start_ssh_proxy(url, remote, ssh_executable):
-    aiotools.start_server(serve_proxy,
-                          args=(url, remote, ssh_executable),
-                          num_proc=1)
+    start_server(serve_proxy,
+                 args=(url, remote, ssh_executable),
+                 num_proc=1)
