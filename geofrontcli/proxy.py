@@ -15,6 +15,7 @@ from aiohttp import ClientError, ClientSession, WSMsgType
 from aiotools import actxmgr, start_server
 from dirspec.basedir import load_config_paths, save_config_path
 
+from .utils import resolve_cmdarg_template
 from .version import VERSION
 
 __all__ = ('start_ssh_proxy', )
@@ -68,7 +69,7 @@ def get_port_for_remote(host):
         return port
 
 
-async def pipe(url, remote, ssh_executable):
+async def pipe(cmd_tpl, url, remote):
     """The main task that proxies the incoming SSH traffic via WebSockets."""
     loop = asyncio.get_event_loop()
     headers = {
@@ -129,14 +130,13 @@ async def pipe(url, remote, ssh_executable):
         logger.info(f'Connecting to local SSH proxy at port {bind_port}...',
                     extra={'user_waiting': False})
         async with session.ws_connect(url, headers=headers) as ws:
-            cmd = [
-                ssh_executable,
-                '-l', remote['user'],
-                '-p', str(bind_port),
-                'localhost',
-            ]
+            cmdargs = resolve_cmdarg_template(cmd_tpl, {
+                'host': 'localhost',
+                'user': remote['user'],
+                'port': str(bind_port),
+            })
             subproc_task = loop.create_task(
-                handle_subproc(cmd, asyncio.Task.current_task()))
+                handle_subproc(cmdargs, asyncio.Task.current_task()))
             await asyncio.sleep(0)  # required!
             ssh_sock, _ = await loop.sock_accept(local_sock)
             ssh_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -185,7 +185,7 @@ async def serve_proxy(loop, pidx, args):
             await pipe_task
 
 
-def start_ssh_proxy(url, remote, ssh_executable):
+def start_ssh_proxy(cmd_tpl, url, remote):
     start_server(serve_proxy,
-                 args=(url, remote, ssh_executable),
+                 args=(cmd_tpl, url, remote),
                  num_proc=1)

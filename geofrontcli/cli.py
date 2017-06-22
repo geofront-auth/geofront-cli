@@ -8,8 +8,10 @@ import argparse
 import logging
 import os
 import os.path
+import pprint
 import subprocess
 import sys
+import time
 import webbrowser
 
 from dirspec.basedir import load_config_paths, save_config_path
@@ -21,6 +23,7 @@ from .client import (REMOTE_PATTERN, Client, ExpiredTokenIdError,
                      NoTokenIdError, ProtocolVersionError, RemoteError,
                      TokenIdError, UnfinishedAuthenticationError)
 from .key import PublicKey
+from .utils import resolve_cmdarg_template
 from .version import VERSION
 
 
@@ -205,11 +208,9 @@ masterkey.add_argument(
 
 
 def align_remote_list(remotes):
-    maxlength = max(map(len, remotes)) if remotes else 0
+    maxlength = max(map(len, remotes)) if remotes else 1
     for alias, remote in sorted(remotes.items()):
-        if remote.endswith(':22'):
-            remote = remote[:-3]
-        yield '{0:{1}}  {2}'.format(alias, maxlength, remote)
+        yield '{0:{1}}  {2}'.format(alias, maxlength, remote['host'])
 
 
 @subparser
@@ -217,6 +218,7 @@ def remotes(args):
     """List available remotes."""
     client = get_client()
     remotes = client.remotes
+    time.sleep(0.11)
     if args.alias:
         for alias in sorted(remotes):
             print(alias)
@@ -230,6 +232,21 @@ remotes.add_argument(
     dest='alias',
     action='store_false',
     help='print remote aliases with their actual addresses, not only aliases'
+)
+
+
+@subparser
+def remote(args):
+    """Get the information of a specific remote."""
+    client = get_client()
+    remote = client.remote(args.remote)
+    time.sleep(0.11)
+    pprint.pprint(remote)
+
+
+remote.add_argument(
+    'remote',
+    help='the remote alias that you want to get information about'
 )
 
 
@@ -302,70 +319,104 @@ colonize.add_argument('remote', help='the remote alias to colonize')
 
 
 @subparser
-def ssh(args, alias=None):
+def ssh(args):
     """SSH to the remote through Geofront's temporary authorization."""
-    logger = logging.getLogger('geofrontcli')
-    if args.proxy and sys.version_info < (3, 6):
+    if args.tunnel and sys.version_info < (3, 6):
+        logger = logging.getLogger('geofrontcli')
         logger.error('To use the SSH proxy, you need to run geofront-cli on '
                      'Python 3.6 or higher.',
                      extra={'user_waiting': False})
-    remote = authorize.call(args, alias=alias)
-    if args.proxy:
-        client = get_client()
-        client.ssh_proxy(remote, args.ssh, alias or args.remote)
+    remote_match = REMOTE_PATTERN.match(args.remote)
+    if not remote_match:
+        raise ValueError('invalid remote format: ' + str(args.remote))
+    alias = remote_match.group('host')
+    user = remote_match.group('user')
+    # port from remote_match is ignored
+    client = get_client()
+    remote = client.remote(alias, quiet=True)
+    if user and user != remote['user']:
+        print('---------- user override ---------')
+        remote['user'] = user  # override username
     else:
-        subprocess.call([args.ssh] + mangle_ssh_args(remote))
+        print('---------- normal auth ---------')
+        remote = authorize.call(args, alias=alias)
+    template = [
+        args.ssh,
+        '-l', '$user',
+        '-p', '$port',
+        '$host',
+    ]
+    if args.tunnel:
+        client.ssh_proxy(template, remote, alias or args.remote)
+    else:
+        cmdargs = resolve_cmdarg_template(template, remote)
+        subprocess.call(cmdargs)
 
 
 ssh.add_argument('remote', help='the remote alias to ssh')
-ssh.add_argument('-p', '--proxy', action='store_true', default=False,
-                 help='use a proxy tunneled via HTTPS to ssh into servers '
-                      'inside remote private networks')
+ssh.add_argument('-t', '--tunnel', action='store_true', default=False,
+                 help='use SSH tunneling via HTTPS WebSockets to access'
+                      'servers inside remote private networks')
 
 
 def parse_scp_path(path, args):
     """Parse remote:path format."""
     if ':' not in path:
         return None, path
-    alias, path = path.split(':', 1)
-    remote = authorize.call(args, alias=alias)
-    return remote, path
+    host, path = path.split(':', 1)
+    return host, path
 
 
 @subparser
 def scp(args):
-    options = []
-    src_remote, src_path = parse_scp_path(args.source, args)
-    dst_remote, dst_path = parse_scp_path(args.destination, args)
-    if src_remote and dst_remote:
+    """SCP from/to the remote through Geofront's temporary authorization."""
+    if args.tunnel and sys.version_info < (3, 6):
+        logger = logging.getLogger('geofrontcli')
+        logger.error('To use the SSH proxy, you need to run geofront-cli on '
+                     'Python 3.6 or higher.',
+                     extra={'user_waiting': False})
+    template = [args.scp]
+    src_host, src_path = parse_scp_path(args.source, args)
+    dst_host, dst_path = parse_scp_path(args.destination, args)
+    if src_host and dst_remote:
         scp.error('source and destination cannot be both '
                   'remote paths at a time')
-    elif not (src_remote or dst_remote):
+    elif not (src_host or dst_host):
         scp.error('one of source and destination has to be a remote path')
     if args.ssh:
-        options.extend(['-S', args.ssh])
+        template.extend(['-S', args.ssh])
     if args.recursive:
-        options.append('-r')
-    remote = src_remote or dst_remote
-    remote_match = REMOTE_PATTERN.match(remote)
-    if not remote_match:
-        raise ValueError('invalid remote format: ' + str(remote))
-    port = remote_match.group('port')
-    if port:
-        options.extend(['-P', port])
-    host = remote_match.group('host')
-    user = remote_match.group('user')
-    if user:
-        host = user + '@' + host
-    if src_remote:
-        options.append(host + ':' + src_path)
+        template.append('-r')
+    host = src_host or dst_host
+    host_match = REMOTE_PATTERN.match(host)
+    if not host_match:
+        raise ValueError('invalid remote format: ' + str(host))
+    alias = host_match.group('host')
+    user = host_match.group('user')
+    # port from host_match is ignored
+    template.extend(['-P', '$port'])
+    if src_host:
+        template.append('$user@$host:' + src_path)
     else:
-        options.append(src_path)
-    if dst_remote:
-        options.append(host + ':' + dst_path)
+        template.append(src_path)
+    if dst_host:
+        template.append('$user@$host:' + dst_path)
     else:
-        options.append(dst_path)
-    subprocess.call([args.scp] + options)
+        template.append(dst_path)
+    client = get_client()
+    remote = client.remote(alias, quiet=True)
+    if user and user != remote_info['user']:
+        remote['user'] = user  # override username
+    else:
+        remote = authorize.call(args, alias=alias)
+    if args.tunnel:
+        client.ssh_proxy(template, remote, alias)
+    else:
+        subprocess.call(resolve_cmdarg_template(template, {
+            'host': remote['host'],
+            'user': remote['user'],
+            'port': remote['port'],
+        }))
 
 
 scp.add_argument(
@@ -376,9 +427,12 @@ scp.add_argument(
 )
 scp.add_argument(
     '-r', '-R', '--recursive',
-    action='store_true',
+    action='store_true', default=False,
     help='recursively copy entire directories'
 )
+scp.add_argument('-t', '--tunnel', action='store_true', default=False,
+                 help='use SSH tunneling via HTTPS WebSockets to access'
+                      'servers inside remote private networks')
 scp.add_argument('source', help='the source path to copy')
 scp.add_argument('destination', help='the destination path')
 

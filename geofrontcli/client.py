@@ -202,6 +202,30 @@ class Client(object):
                         extra={'user_waiting': False})
             raise
 
+    def remote(self, alias, quiet=False):
+        """(:class:`dict`) The remote information including user, host, and
+        port.
+
+        """
+        logger = self.logger.getChild('remote')
+        if not quiet:
+            logger.info('Loading the remote information from the Geofront '
+                        'server...', extra={'user_waiting': True})
+        try:
+            path = ('tokens', self.token_id, 'remotes', alias)
+            with self.request('GET', path) as r:
+                assert r.code == 200
+                mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+                assert mimetype == 'application/json'
+                result = json.loads(r.read().decode('utf-8'))
+            if not quiet:
+                logger.info('Done.', extra={'user_waiting': False})
+        except:
+            logger.info('Failed to fetch the remote information.',
+                        extra={'user_waiting': False})
+            raise
+        return result['remote']
+
     def authorize(self, alias):
         """Temporarily authorize you to access the given remote ``alias``.
         A made authorization keeps alive in a minute, and then will be expired.
@@ -238,7 +262,7 @@ class Client(object):
         return result['remote']
 
     if sys.version_info >= (3, 6):  # pragma: no cover
-        def ssh_proxy(self, remote, ssh_executable, alias):
+        def ssh_proxy(self, cmd_template, remote, alias):
             logger = self.logger.getChild('ssh_proxy')
             try:
                 path = ('ws', 'tokens', self.token_id, 'remotes', alias, 'ssh')
@@ -248,7 +272,7 @@ class Client(object):
                 logger.info('Authentication is required.',
                             extra={'user_waiting': False})
                 raise
-            start_ssh_proxy(url, remote, ssh_executable)
+            start_ssh_proxy(cmd_template, url, remote)
 
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(
