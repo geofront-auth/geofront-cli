@@ -376,7 +376,7 @@ def scp(args):
     template = [args.scp]
     src_host, src_path = parse_scp_path(args.source, args)
     dst_host, dst_path = parse_scp_path(args.destination, args)
-    if src_host and dst_remote:
+    if src_host and dst_host:
         scp.error('source and destination cannot be both '
                   'remote paths at a time')
     elif not (src_host or dst_host):
