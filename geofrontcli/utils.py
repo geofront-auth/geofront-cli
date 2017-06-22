@@ -24,5 +24,4 @@ def resolve_cmdarg_template(template, vars):
         if num_replaced:
             resolved[idx] = new_piece
 
-    print(f'--- resolved template ---\n{resolved}')
     return resolved
