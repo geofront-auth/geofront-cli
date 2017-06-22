@@ -335,10 +335,8 @@ def ssh(args):
     client = get_client()
     remote = client.remote(alias, quiet=True)
     if user and user != remote['user']:
-        print('---------- user override ---------')
         remote['user'] = user  # override username
     else:
-        print('---------- normal auth ---------')
         remote = authorize.call(args, alias=alias)
     template = [
         args.ssh,
