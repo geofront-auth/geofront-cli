@@ -342,8 +342,12 @@ def ssh(args):
         args.ssh,
         '-l', '$user',
         '-p', '$port',
-        '$host',
     ]
+    if args.identity:
+        template.extend(['-i', args.identity])
+    if args.dynamic_port:
+        template.extend(['-D', args.dynamic_port])
+    template.append('$host')
     if args.tunnel:
         client.ssh_proxy(template, remote, alias or args.remote)
     else:
@@ -352,6 +356,10 @@ def ssh(args):
 
 
 ssh.add_argument('remote', help='the remote alias to ssh')
+ssh.add_argument('-i', '--identity',
+                 help='alternative SSH identity (private key)')
+ssh.add_argument('-D', '--dynamic-port',
+                 help='port number to use for dynamic TCP forwarding')
 ssh.add_argument('-t', '--tunnel', action='store_true', default=False,
                  help='use SSH tunneling via HTTPS WebSockets to access'
                       'servers inside remote private networks')
@@ -385,6 +393,8 @@ def scp(args):
         template.extend(['-S', args.ssh])
     if args.recursive:
         template.append('-r')
+    if args.identity:
+        template.extend(['-i', args.identity])
     host = src_host or dst_host
     host_match = REMOTE_PATTERN.match(host)
     if not host_match:
@@ -428,6 +438,8 @@ scp.add_argument(
     action='store_true', default=False,
     help='recursively copy entire directories'
 )
+scp.add_argument('-i', '--identity',
+                 help='alternative SSH identity (private key)')
 scp.add_argument('-t', '--tunnel', action='store_true', default=False,
                  help='use SSH tunneling via HTTPS WebSockets to access'
                       'servers inside remote private networks')
