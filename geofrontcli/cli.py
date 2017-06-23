@@ -208,9 +208,20 @@ masterkey.add_argument(
 
 
 def align_remote_list(remotes):
-    maxlength = max(map(len, remotes)) if remotes else 1
+    if remotes:
+        maxlen_alias = max(map(len, remotes.keys()))
+        maxlen_user = max(map(lambda v: len(v['user']), remotes.values()))
+        maxlen_host = max(map(lambda v: len(v['host']), remotes.values()))
+    else:
+        maxlen_alias = 1
+        maxlen_user = 1
+        maxlen_host = 1
     for alias, remote in sorted(remotes.items()):
-        yield '{0:{1}}  {2}'.format(alias, maxlength, remote['host'])
+        yield '{0:{1}}  {2:{3}} @ {4:{5}} : {6}'.format(
+            alias, maxlen_alias,
+            remote['user'], maxlen_user,
+            remote['host'], maxlen_host,
+            remote['port'])
 
 
 @subparser
