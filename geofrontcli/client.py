@@ -169,7 +169,7 @@ class Client(object):
     @property
     def master_key(self):
         """(:class:`~.key.PublicKey`) The current master key."""
-        path = ('tokens', self.token_id, 'masterkey')
+        path = ('masterkey',)
         headers = {'Accept': 'text/plain'}
         with self.request('GET', path, headers=headers) as r:
             if r.code == 200:
