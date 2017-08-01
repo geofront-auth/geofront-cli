@@ -6,7 +6,9 @@ import asyncio
 import contextlib
 import csv
 import logging
+import os
 import pathlib
+import signal
 import socket
 import sys
 import traceback
@@ -169,7 +171,8 @@ async def pipe(cmd_tpl, url, remote):
         if ssh_sock:
             ssh_sock.close()
         session.close()
-        loop.stop()
+        # inform the main that we finished
+        os.kill(0, signal.SIGINT)
 
 
 @actxmgr
