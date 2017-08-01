@@ -188,4 +188,5 @@ async def serve_proxy(loop, pidx, args):
 def start_ssh_proxy(cmd_tpl, url, remote):
     start_server(serve_proxy,
                  args=(cmd_tpl, url, remote),
-                 num_proc=1)
+                 use_threading=True,
+                 num_workers=1)

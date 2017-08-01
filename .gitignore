@@ -5,6 +5,7 @@
 .cache
 .coverage
 .tox
+.envrc
 build
 dist
 venv
