@@ -63,11 +63,12 @@ setup(
     maintainer_email='dev' '@' 'spoqa.com',
     license='GPLv3 or later',
     packages=find_packages(exclude=['tests']),
-    entry_points='''
-        [console_scripts]
-        geofront-cli = geofrontcli.cli:main
-        gfg = geofrontcli.cli:main_go
-    ''',
+    entry_points={
+        'console_scripts': [
+            'geofront-cli = geofrontcli.cli:main',
+            'gfg = geofrontcli.cli:main_go',
+        ],
+    },
     install_requires=list(install_requires),
     extras_require={
         ":python_version<'3.4'": list(below_py34_requires),
