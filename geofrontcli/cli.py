@@ -337,6 +337,7 @@ def ssh(args):
         logger.error('To use the SSH proxy, you need to run geofront-cli on '
                      'Python 3.6 or higher.',
                      extra={'user_waiting': False})
+        return
     remote_match = REMOTE_PATTERN.match(args.remote)
     if not remote_match:
         raise ValueError('invalid remote format: ' + str(args.remote))
