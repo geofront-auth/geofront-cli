@@ -57,6 +57,8 @@ parser.add_argument('-v', '--version', action='version',
                     version='%(prog)s ' + VERSION)
 subparsers = parser.add_subparsers()
 
+logger = logging.getLogger('geofrontcli')
+
 
 def get_server_url():
     for path in load_config_paths(CONFIG_RESOURCE):
@@ -123,13 +125,17 @@ def authenticate(args):
     """Authenticate to Geofront server."""
     client = get_client()
     while True:
-        with client.authenticate() as url:
-            if args.open_browser:
-                print('Continue to authenticate in your web browser...')
-                webbrowser.open(url)
-            else:
-                print('Continue to authenticate in your web browser:')
-                print(url)
+        try:
+            with client.authenticate() as url:
+                if args.open_browser:
+                    print('Continue to authenticate in your web browser...')
+                    webbrowser.open(url)
+                else:
+                    print('Continue to authenticate in your web browser:')
+                    print(url)
+        except Exception as e:
+            # exception info is already provided in client.Client.authenticate()
+            return
         input('Press return to continue')
         try:
             client.identity
@@ -228,7 +234,11 @@ def align_remote_list(remotes):
 def remotes(args):
     """List available remotes."""
     client = get_client()
-    remotes = client.remotes
+    try:
+        remotes = client.remotes
+    except Exception:
+        # exception info is already provided in client.Client.remotes()
+        return
     time.sleep(0.11)
     if args.alias:
         for alias in sorted(remotes):
@@ -307,7 +317,11 @@ def colonize(args):
 
     """
     client = get_client()
-    remote = client.remotes.get(args.remote, args.remote)
+    try:
+        remote = client.remotes.get(args.remote, args.remote)
+    except:
+        # exception info is already provided in client.Client.remote()
+        return
     cmd = [args.ssh]
     if args.identity_file:
         cmd.extend(['-i', args.identity_file])
@@ -333,7 +347,6 @@ colonize.add_argument('remote', help='the remote alias to colonize')
 def ssh(args):
     """SSH to the remote through Geofront's temporary authorization."""
     if args.tunnel and sys.version_info < (3, 6):
-        logger = logging.getLogger('geofrontcli')
         logger.error('To use the SSH proxy, you need to run geofront-cli on '
                      'Python 3.6 or higher.',
                      extra={'user_waiting': False})
@@ -345,7 +358,11 @@ def ssh(args):
     user = remote_match.group('user')
     # port from remote_match is ignored
     client = get_client()
-    remote = client.remote(alias, quiet=True)
+    try:
+        remote = client.remote(alias, quiet=True)
+    except Exception:
+        # exception info is already provided in client.Client.remote()
+        return
     if user and user != remote['user']:
         remote['user'] = user  # override username
     else:
@@ -389,7 +406,6 @@ def parse_scp_path(path, args):
 def scp(args):
     """SCP from/to the remote through Geofront's temporary authorization."""
     if args.tunnel and sys.version_info < (3, 6):
-        logger = logging.getLogger('geofrontcli')
         logger.error('To use the SSH proxy, you need to run geofront-cli on '
                      'Python 3.6 or higher.',
                      extra={'user_waiting': False})
@@ -463,7 +479,11 @@ scp.add_argument('destination', help='the destination path')
 def go(args):
     """Select a remote and SSH to it at once (in interactive way)."""
     client = get_client()
-    remotes = client.remotes
+    try:
+        remotes = client.remotes
+    except Exception:
+        # exception info is already provided in client.Client.remotes()
+        return
     chosen = iterfzf(align_remote_list(remotes))
     if chosen is None:
         return

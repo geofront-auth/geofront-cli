@@ -13,7 +13,7 @@ import uuid
 
 from keyring import get_password, set_password
 from six import string_types
-from six.moves.urllib.error import HTTPError
+from six.moves.urllib.error import HTTPError, URLError
 from six.moves.urllib.parse import urljoin
 from six.moves.urllib.request import OpenerDirector, Request, build_opener
 
@@ -85,7 +85,11 @@ class Client(object):
             response = self.opener.open(request)
         except HTTPError as e:
             logger.error('{0}: returned {1} {2}'.format(url, e.code, e.reason))
-            response = e
+            raise
+        except URLError as e:
+            logger.error('{0}: errored {1}'.format(url, e.reason))
+            logger.error('Maybe you are not connected to the Internet!')
+            raise
         server_version = response.headers.get('X-Geofront-Version')
         if server_version:
             try:
@@ -197,7 +201,7 @@ class Client(object):
             logger.info('Total %d remotes.', len(result),
                         extra={'user_waiting': False})
             return result
-        except:
+        except Exception:
             logger.info('Failed to fetch the list of remotes.',
                         extra={'user_waiting': False})
             raise
@@ -220,7 +224,7 @@ class Client(object):
                 result = json.loads(r.read().decode('utf-8'))
             if not quiet:
                 logger.info('Done.', extra={'user_waiting': False})
-        except:
+        except Exception:
             logger.info('Failed to fetch the remote information.',
                         extra={'user_waiting': False})
             raise
