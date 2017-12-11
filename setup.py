@@ -33,8 +33,8 @@ below_py34_requires = {
 }
 
 py36_or_higher_requires = {
-    'aiohttp ~= 2.1.0',
-    'aiotools ~= 0.4.0',
+    'aiohttp ~= 2.3.0',
+    'aiotools ~= 0.5.0',
 }
 
 win32_requires = {
