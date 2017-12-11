@@ -84,7 +84,7 @@ class Client(object):
         try:
             response = self.opener.open(request)
         except HTTPError as e:
-            logger.exception(e)
+            logger.error('{0}: returned {1} {2}'.format(url, e.code, e.reason))
             response = e
         server_version = response.headers.get('X-Geofront-Version')
         if server_version:
