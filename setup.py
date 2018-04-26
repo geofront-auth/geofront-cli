@@ -24,8 +24,6 @@ install_requires = {
     'certifi',
     'iterfzf >= 0.2.0.16.7, < 1.0.0.0.0',
     'keyring >= 3.7',
-    # FIXME: https://github.com/jaraco/keyring/pull/320
-    'secretstorage >= 2.3.1, < 3.0.0',
     'logging-spinner >= 0.2.1',
     'six',
 }
