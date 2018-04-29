@@ -13,13 +13,15 @@ import uuid
 
 from keyring import get_password, set_password
 from six import string_types
-from six.moves.urllib.error import HTTPError
+from six.moves.urllib.error import HTTPError, URLError
 from six.moves.urllib.parse import urljoin
 from six.moves.urllib.request import OpenerDirector, Request, build_opener
 
 from .key import PublicKey
 from .ssl import create_urllib_https_handler
 from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
+if sys.version_info >= (3, 6):  # pragma: no cover
+    from .proxy import start_ssh_proxy
 
 __all__ = ('REMOTE_PATTERN', 'BufferedResponse',
            'Client', 'ExpiredTokenIdError',
@@ -82,8 +84,12 @@ class Client(object):
         try:
             response = self.opener.open(request)
         except HTTPError as e:
-            logger.exception(e)
-            response = e
+            logger.error('{0}: returned {1} {2}'.format(url, e.code, e.reason))
+            raise
+        except URLError as e:
+            logger.error('{0}: errored {1}'.format(url, e.reason))
+            logger.error('Maybe you are not connected to the Internet!')
+            raise
         server_version = response.headers.get('X-Geofront-Version')
         if server_version:
             try:
@@ -167,7 +173,7 @@ class Client(object):
     @property
     def master_key(self):
         """(:class:`~.key.PublicKey`) The current master key."""
-        path = ('tokens', self.token_id, 'masterkey')
+        path = ('masterkey',)
         headers = {'Accept': 'text/plain'}
         with self.request('GET', path, headers=headers) as r:
             if r.code == 200:
@@ -192,15 +198,37 @@ class Client(object):
                 mimetype, _ = parse_mimetype(r.headers['Content-Type'])
                 assert mimetype == 'application/json'
                 result = json.loads(r.read().decode('utf-8'))
-            fmt = '{0[user]}@{0[host]}:{0[port]}'.format
             logger.info('Total %d remotes.', len(result),
                         extra={'user_waiting': False})
-            return dict((alias, fmt(remote))
-                        for alias, remote in result.items())
-        except:
+            return result
+        except Exception:
             logger.info('Failed to fetch the list of remotes.',
                         extra={'user_waiting': False})
             raise
+
+    def remote(self, alias, quiet=False):
+        """(:class:`dict`) The remote information including user, host, and
+        port.
+
+        """
+        logger = self.logger.getChild('remote')
+        if not quiet:
+            logger.info('Loading the remote information from the Geofront '
+                        'server...', extra={'user_waiting': True})
+        try:
+            path = ('tokens', self.token_id, 'remotes', alias)
+            with self.request('GET', path) as r:
+                assert r.code == 200
+                mimetype, _ = parse_mimetype(r.headers['Content-Type'])
+                assert mimetype == 'application/json'
+                result = json.loads(r.read().decode('utf-8'))
+            if not quiet:
+                logger.info('Done.', extra={'user_waiting': False})
+        except Exception:
+            logger.info('Failed to fetch the remote information.',
+                        extra={'user_waiting': False})
+            raise
+        return result['remote']
 
     def authorize(self, alias):
         """Temporarily authorize you to access the given remote ``alias``.
@@ -235,7 +263,20 @@ class Client(object):
             logger.info('Access to %s has authorized!  The access will be '
                         'available only for a time.', alias,
                         extra={'user_waiting': False})
-        return '{0[user]}@{0[host]}:{0[port]}'.format(result['remote'])
+        return result['remote']
+
+    if sys.version_info >= (3, 6):  # pragma: no cover
+        def ssh_proxy(self, cmd_template, remote, alias):
+            logger = self.logger.getChild('ssh_proxy')
+            try:
+                path = ('ws', 'tokens', self.token_id, 'remotes', alias, 'ssh')
+                url = './{0}/'.format('/'.join(path))
+                url = urljoin(self.server_url, url)
+            except TokenIdError:
+                logger.info('Authentication is required.',
+                            extra={'user_waiting': False})
+                raise
+            start_ssh_proxy(cmd_template, url, remote)
 
     def __repr__(self):
         return '{0.__module__}.{0.__name__}({1!r})'.format(
