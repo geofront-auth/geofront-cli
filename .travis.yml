@@ -13,9 +13,9 @@ python:
 matrix:
   include:
   - os: osx
+    osx_image: xcode9.4
     language: generic
-    osx_image: xcode8.1
-    # See also: https://github.com/Homebrew/homebrew-core/issues/6949
+    python: null
 install:
   |
   if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
