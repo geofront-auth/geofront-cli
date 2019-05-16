@@ -197,6 +197,10 @@ class Client(object):
                         extra={'user_waiting': False})
             return dict((alias, fmt(remote))
                         for alias, remote in result.items())
+        except KeyboardInterrupt:
+            logger.info('Request is aborted.',
+                        extra={'user_waiting': False})
+            raise
         except Exception:
             logger.info('Failed to fetch the list of remotes.',
                         extra={'user_waiting': False})
@@ -225,6 +229,10 @@ class Client(object):
                 assert result['success'] == 'authorized'
         except TokenIdError:
             logger.info('Authentication is required.',
+                        extra={'user_waiting': False})
+            raise
+        except KeyboardInterrupt:
+            logger.info('Authorization is aborted.',
                         extra={'user_waiting': False})
             raise
         except Exception:
