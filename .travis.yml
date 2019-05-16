@@ -13,17 +13,17 @@ python:
 matrix:
   include:
   - os: osx
-    osx_image: xcode9.4
+    osx_image: xcode10.2
     language: generic
     python: null
 install:
   |
   if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
-    pip install --upgrade pip setuptools tox-travis;
+    pip install --upgrade pip setuptools tox-travis
   elif [[ "$TRAVIS_OS_NAME" = "osx" ]]; then
-    brew tap drolando/homebrew-deadsnakes;
+    brew tap drolando/homebrew-deadsnakes
     brew install python34 python35 python36 python3 pypy
     pip install --upgrade pip setuptools
-    pip install --user tox;
+    pip install tox
   fi
 script: tox
