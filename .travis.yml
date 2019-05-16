@@ -21,10 +21,9 @@ install:
   if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
     pip install --upgrade pip setuptools tox-travis
   elif [[ "$TRAVIS_OS_NAME" = "osx" ]]; then
-    export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
-    export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
-    export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
-    brew install sqlite3
+    export LDFLAGS="${LDFLAGS} -L/usr/local/opt/sqlite3/lib -L/usr/local/opt/zlib/lib"
+    export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/sqlite3/include -I/usr/local/opt/zlib/include"
+    export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/sqlite3/lib/pkgconfig /usr/local/opt/zlib/lib/pkgconfig"
     versions=(3.7.2 3.6.8 3.5.6 3.4.9 2.7.15 pypy3.5-6.0 pypy2.7-6.0.0)
     for ver in $versions; do
       pyenv install --verbose --skip-existing "$ver"
