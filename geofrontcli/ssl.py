@@ -16,9 +16,9 @@ def get_https_context_factory():
     if not hasattr(ssl, '_create_default_https_context') or \
        hasattr(ssl, 'get_default_verify_paths') and \
        ssl.get_default_verify_paths()[0] is None:
-        m = re.match(r'OpenSSL (\d+)\.(\d+)\.(\d+)',
+        m = re.match(r'(Open|Libre)SSL (\d+)\.(\d+)\.(\d+)',
                      ssl.OPENSSL_VERSION)
-        openssl_version = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        openssl_version = int(m.group(2)), int(m.group(3)), int(m.group(4))
         if openssl_version < (1, 0, 2) and hasattr(certifi, 'old_where'):
             # https://github.com/certifi/python-certifi/issues/26
             where = certifi.old_where
