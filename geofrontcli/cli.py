@@ -329,6 +329,8 @@ def ssh(args, alias=None):
         options = get_ssh_options(remote)
     except ValueError as e:
         ssh.error(str(e))
+    if args.jump_host:
+        options.extend(['-o', 'ProxyJump==%s' % (args.jump_host)])
     subprocess.call([args.ssh] + options)
 
 
@@ -358,6 +360,8 @@ def scp(args):
         options.extend(['-S', args.ssh])
     if args.recursive:
         options.append('-r')
+    if args.jump_host:
+        options.extend(['-o', 'ProxyJump==%s' % (args.jump_host)])
     remote = src_remote or dst_remote
     remote_match = REMOTE_PATTERN.match(remote)
     if not remote_match:
@@ -414,6 +418,14 @@ for p in authenticate, authorize, start, ssh, scp, go:
         action='store_false',
         help='do not open the authentication web page using browser.  '
              'instead print the url to open'
+    )
+
+
+for p in ssh, scp:
+    p.add_argument(
+        '-J', '--jump-host',
+        default=None,
+        help='Proxy jump host to use'
     )
 
 
