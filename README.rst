@@ -150,6 +150,26 @@ __ https://hongminhee.org/
 Changelog
 ---------
 
+Version 0.4.3
+`````````````
+
+Released on March 25, 2020.
+
+- Added jump host options to use ProxyJump in SSH. [`#18`__ by cynthia]
+
+__ https://github.com/spoqa/geofront-cli/pull/18
+
+
+Version 0.4.2
+`````````````
+
+Released on February 26, 2020.
+
+- Added supporting for LibreSSL. [`#16`__ by cynthia]
+
+__ https://github.com/spoqa/geofront-cli/pull/16
+
+
 Version 0.4.1
 `````````````
 
@@ -195,7 +215,7 @@ Released on April 3, 2017.
 Version 0.3.3
 `````````````
 
-Released on Match 30, 2017.
+Released on March 30, 2017.
 
 - Now ``-d``/``--debug`` option prints more debug logs.
 - Fixed `system errors during getting/setting password through keyring/Keychain
