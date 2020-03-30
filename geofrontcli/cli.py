@@ -419,9 +419,6 @@ for p in authenticate, authorize, start, ssh, scp, go:
         help='do not open the authentication web page using browser.  '
              'instead print the url to open'
     )
-
-
-for p in ssh, scp:
     p.add_argument(
         '-J', '--jump-host',
         default=None,
