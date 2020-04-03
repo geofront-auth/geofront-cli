@@ -98,7 +98,7 @@ command instead of vanilla ``ssh``:
    Welcome to Ubuntu 12.04.3 LTS (GNU/Linux 2.6.32-042stab078.27 i686)
 
     * Documentation:  https://help.ubuntu.com/
-   ubuntu@web-1:~$ 
+   ubuntu@web-1:~$
 
 In most cases, you probably need to list remotes to find an alias to SSH
 before run ``geofront-cli ssh`` command.  ``geofront-cli go`` command is
@@ -111,7 +111,7 @@ a single command for these two actions at once:
    Welcome to Ubuntu 12.04.3 LTS (GNU/Linux 2.6.32-042stab078.27 i686)
 
     * Documentation:  https://help.ubuntu.com/
-   ubuntu@web-1:~$ 
+   ubuntu@web-1:~$
 
 Note that there's a shortcut command ``gfg`` which is an alias of
 ``geofront-cli go``.
