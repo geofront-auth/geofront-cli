@@ -153,8 +153,13 @@ Changelog
 Version 0.4.4
 `````````````
 
-To be released.
+Released on April 03, 2020.
 
+- Fixed some command won't work properly.
+  This bug occured when running ssh or scp command through the other command.
+  (e.g. `geofront-cli go`) [`#19`__ by cynthia]
+
+__ https://github.com/spoqa/geofront-cli/pull/19
 
 Version 0.4.3
 `````````````
