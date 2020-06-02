@@ -19,7 +19,7 @@ from six.moves.urllib.request import OpenerDirector, Request, build_opener
 
 from .key import PublicKey
 from .ssl import create_urllib_https_handler
-from .version import MIN_PROTOCOL_VERSION, MAX_PROTOCOL_VERSION, VERSION
+from .version import MAX_PROTOCOL_VERSION, MIN_PROTOCOL_VERSION, VERSION
 
 __all__ = ('REMOTE_PATTERN', 'BufferedResponse',
            'Client', 'ExpiredTokenIdError',
@@ -197,7 +197,11 @@ class Client(object):
                         extra={'user_waiting': False})
             return dict((alias, fmt(remote))
                         for alias, remote in result.items())
-        except:
+        except KeyboardInterrupt:
+            logger.info('Request is aborted.',
+                        extra={'user_waiting': False})
+            raise
+        except Exception:
             logger.info('Failed to fetch the list of remotes.',
                         extra={'user_waiting': False})
             raise
@@ -227,7 +231,11 @@ class Client(object):
             logger.info('Authentication is required.',
                         extra={'user_waiting': False})
             raise
-        except:
+        except KeyboardInterrupt:
+            logger.info('Authorization is aborted.',
+                        extra={'user_waiting': False})
+            raise
+        except Exception:
             logger.info('Authorization to %s has failed.', alias,
                         extra={'user_waiting': False})
             raise
