@@ -41,6 +41,12 @@ try:
 except subprocess.CalledProcessError:
     pass
 
+MOSH_PROGRAM = None
+try:
+    MOSH_PROGRAM = subprocess.check_output([WHICH_CMD, 'mosh']).strip() or None
+except subprocess.CalledProcessError:
+    pass
+
 
 parser = argparse.ArgumentParser(description='Geofront client utility')
 parser.add_argument(
@@ -287,6 +293,33 @@ def get_ssh_options(remote):
     return options
 
 
+def get_mosh_options(remote, ssh):
+    """Translate the given ``remote`` to a corresponding :program:`mosh`
+    options.  For example, it returns the following list for ``'user@host'``::
+
+        ['--', 'user@host']
+
+    The remote can contain the port number or omit the user login as well
+    e.g. ``'host:22'``::
+
+        ['--ssh="/usr/bin/ssh -p 22"', '--', 'host']
+
+    """
+    remote_match = REMOTE_PATTERN.match(remote)
+    if not remote_match:
+        raise ValueError('invalid remote format: ' + str(remote))
+    options = []
+    user = remote_match.group('user')
+    host = remote_match.group('host')
+    if user:
+        host = user + '@' + host
+    port = remote_match.group('port')
+    if port:
+        ssh += b' -p ' + port.encode('utf-8')
+    options.extend([b'--ssh', ssh, b'--', host])
+    return options
+
+
 @subparser
 def colonize(args):
     """Make the given remote to allow the current master key.
@@ -400,6 +433,28 @@ scp.add_argument('destination', help='the destination path')
 
 
 @subparser
+def mosh(args, alias=None):
+    """Mosh to the remote through Geofront's temporary authorization."""
+    if not args.mosh:
+        mosh.error('could not detect mosh client.')
+    remote = authorize.call(args, alias=alias)
+    try:
+        options = get_mosh_options(remote, ssh=args.ssh)
+    except ValueError as e:
+        mosh.error(str(e))
+    command = [args.mosh] + options
+    subprocess.call(command)
+
+
+mosh.add_argument('remote', help='the remote alias to mosh')
+mosh.add_argument(
+    '-M', '--mosh',
+    default=MOSH_PROGRAM,
+    required=False,
+    help='mosh client to use' + (' [%(default)s]' if MOSH_PROGRAM else '')
+)
+
+@subparser
 def go(args):
     """Select a remote and SSH to it at once (in interactive way)."""
     client = get_client()
@@ -411,7 +466,7 @@ def go(args):
     ssh.call(args, alias=alias)
 
 
-for p in authenticate, authorize, start, ssh, scp, go:
+for p in authenticate, authorize, start, ssh, scp, mosh, go:
     p.add_argument(
         '-O', '--no-open-browser',
         dest='open_browser',
