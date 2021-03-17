@@ -331,7 +331,11 @@ def ssh(args, alias=None):
         ssh.error(str(e))
     if args.jump_host:
         options.extend(['-o', 'ProxyJump=={}'.format(args.jump_host)])
-    subprocess.call([args.ssh] + options)
+
+    if args.exec:
+        subprocess.call([args.ssh] + options + [args.exec])
+    else:
+        subprocess.call([args.ssh] + options)
 
 
 ssh.add_argument('remote', help='the remote alias to ssh')
@@ -418,6 +422,11 @@ for p in authenticate, authorize, start, ssh, scp, go:
         action='store_false',
         help='do not open the authentication web page using browser.  '
              'instead print the url to open'
+    )
+    p.add_argument(
+        '-X', '--exec',
+        default=None,
+        help='Command to run'
     )
     p.add_argument(
         '-J', '--jump-host',
