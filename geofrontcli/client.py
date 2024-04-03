@@ -2,7 +2,6 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 """
-import collections
 import contextlib
 import io
 import json
@@ -11,6 +10,7 @@ import re
 import sys
 import uuid
 
+from collections.abc import MutableMapping
 from keyring import get_password, set_password
 from six import string_types
 from six.moves.urllib.error import HTTPError
@@ -255,7 +255,7 @@ class BufferedResponse(io.BytesIO):
         self.headers = headers
 
 
-class PublicKeyDict(collections.MutableMapping):
+class PublicKeyDict(MutableMapping):
     """:class:`dict`-like object that contains public keys."""
 
     def __init__(self, client):
