@@ -465,6 +465,13 @@ def fix_mac_codesign():
 
 
 def main(args=None):
+    try:
+        _run(args)
+    except KeyboardInterrupt:
+        parser.exit()
+
+
+def _run(args=None):
     args = parser.parse_args(args)
     log_handler = logging.StreamHandler(sys.stdout)
     log_handler.addFilter(UserWaitingFilter())

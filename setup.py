@@ -28,16 +28,9 @@ install_requires = {
     'six',
 }
 
-below_py34_requires = {
-    'enum34',
-}
-
 win32_requires = {
     'pypiwin32',
 }
-
-if sys.version_info < (3, 4):
-    install_requires.update(below_py34_requires)
 
 if sys.platform == 'win32':
     install_requires.update(win32_requires)
@@ -62,7 +55,6 @@ setup(
     ''',
     install_requires=list(install_requires),
     extras_require={
-        ":python_version<'3.4'": list(below_py34_requires),
         ":sys_platform=='win32'": list(win32_requires),
     },
     classifiers=[
@@ -75,10 +67,10 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: System :: Systems Administration :: Authentication/Directory',  # noqa: E501
@@ -90,7 +82,7 @@ setup(
 if 'bdist_wheel' in sys.argv and (
         below_py34_requires.issubset(install_requires) or
         win32_requires.issubset(install_requires)):
-    warnings.warn('Building wheels on Windows or using below Python 3.4 is '
-                  'not recommended since platform-specific dependencies can '
-                  'be merged into common dependencies:\n' +
+    warnings.warn('Building wheels on Windows is not recommended since '
+                  'platform-specific dependencies can be merged into common '
+                  'dependencies:\n' +
                   '\n'.join('- ' + i for i in install_requires))
